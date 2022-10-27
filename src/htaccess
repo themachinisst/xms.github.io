@@ -1,0 +1,4 @@
+RewriteEngine On
+# JWT authorization rule added by Javed
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]

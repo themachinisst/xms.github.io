@@ -49,8 +49,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             if($stmt->execute()){
                 //store result
                 $stmt->store_result();
-
-                echo $email, $password;
                 //check if email exists, if yes then verify the password
                 if($stmt->num_rows==1){
                     //Bind result variables 
@@ -105,7 +103,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 </head>
 <body>
     <div class="wrapper">
-        <h2>Login</h2>
+        <h2>Let's Make it happen <br/>Together</h2>
         <p>Please fill in your credentials to login.</p>
 
         <?php 

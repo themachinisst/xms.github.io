@@ -9,8 +9,8 @@ $password_err = $confirm_password_err = "";
 
 
 //additional varibales 
-$name = $organization = $city = $subagency =  $email = $phone ="";
-$name_err = $organization_err = $city_err = $subagency_err =  $email_err =  $phone_err = "";
+$name = $organization = $city = $subagency =  $email = $phone = $terms ="";
+$name_err = $organization_err = $city_err = $subagency_err =  $email_err =  $phone_err = $terms_err = "";
 
 
 
@@ -74,7 +74,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     //For user's organization ----------START-------------------
         
-    if(empty(trim($_POST["Organization"]))){
+    if((trim($_POST["Organization"]))){
         $organization_err = "Please enter a valid organization name.";
     }else{
         //Prepare a select statement
@@ -142,36 +142,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
      
     //For user's  BloodGroup  -----------END--------------------
 
-    //For user's City ----------START-------------------
-    
 
-        //Prepare a select statement
-        if(empty($_POST["city"])){
-            $city_err = "Please enter a valid city.";
-        }else{
-            // $mysqli->prepare function is used to prepare an SQL statement for execution.
-            if($stmt = $mysqli->prepare($sql)){
-                //bind variabes to the prepared statement as parameters
-                $stmt->bind_param("s",  $param_city);
-
-                //set parameters
-                $param_city = trim($_POST["city"]);
-
-                //attempt to execute the prepared statement 
-                if($stmt->execute()){
-                    
-                    //store results
-                    $stmt->store_result();
-                    $city = trim($_POST["city"]);
-                }else{
-                    echo "OOPs! Something went wrong. Please try again !";
-                }
-                //close statement
-                $stmt->close();
-            }
-        }
-     
-    //For user's  City  -----------END--------------------
 
     //For user's email ----------START-------------------
     
@@ -246,15 +217,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     //For user's phone -----------END--------------------
 
+    //For checking terms and condition's checkbox  ----------START-------------------
+    if($_POST["terms"] != 1){
+        $terms_err = "Please go through our Terms and Conditions.";
+    }
+    //For checking terms and condition's checkbox  ----------END-------------------
+
+
     //Check input errors before inserting in data base
-    if(empty($password_err) && empty($confirm_password_err) && empty($name_err) && empty($organization_err) && empty($subagency_err) && empty($email_err) && empty($phone_err)  && empty($city_err)){
+    if(empty($password_err) && empty($confirm_password_err) && empty($name_err) && empty($organization_err) && empty($subagency_err) && empty($email_err) && empty($phone_err)){
             
         // Prepare an insert statement
-        $sql = "INSERT INTO login (Password, Name, Organization, SubAgency, Email, Phone, City) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO login (Password, Name, Organization, SubAgency, Email, Phone) VALUES (?, ?, ?, ?, ?, ?)";
 
         if($stmt = $mysqli->prepare($sql)){
             //Bind variables to the prepared statement as parameters
-            $stmt->bind_param("sssssis", $param_password, $param_name, $param_organization, $param_subagency, $param_email, $param_phone, $param_city);
+            $stmt->bind_param("sssssi", $param_password, $param_name, $param_organization, $param_subagency, $param_email, $param_phone);
 
             //set parameters 
             $param_name = $name;
@@ -262,7 +240,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_subagency = $subagency;
             $param_email = $email;
             $param_phone = $phone;
-            $param_city = $city;
+            
 
 
             //creates a password hash
@@ -368,35 +346,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
             <div class="form-group client">
                 <label>Organization Name <span style="color:red;">*</span></label>
-                    <input type="text" name="Organization" class="form-control <?php echo (!empty($organization_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $organization; ?>"required>
+                    <input type="text" name="Organization" class="form-control <?php echo (!empty($organization_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $organization; ?>">
                     </input>
                 <span class="invalid-feedback"><?php echo $organization_err; ?></span>
             </div>    
 
             <div class="form-group agency">
-                <label>Sub Agency Name</label>
+                <label>Sub Agency Name <span style="color:red;">*</span></label>
                     <input type="text" name="SubAgency" class="form-control <?php echo (!empty($subagency_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $subagency; ?>">
                     </input>
                 <span class="invalid-feedback"><?php echo $subagency_err; ?></span>
             </div>    
             
-            <div class="form-group">
-                <label>City <span style="color:red;">*</span></label>
-                <select name="city" class="form-control <?php echo (!empty($city_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $city; ?>"required>
-                    <option value="" disabled selected>Choose option</option>
-                    <option value="Mumbai">Mumbai</option>
-                    <option value="Pune">Pune</option>
-                    <option value="Nagpur">Nagpur</option>
-                    <option value="Ahmedabad">Ahmedabad</option>
-                    <option value="Surat">Surat</option>
-                    <option value="Baroda">Baroda</option>
-                    <option value="Bhopal">Bhopal</option>
-                    <option value="Indore">Indore</option>
-                    <option value="Gwalior">Gwalior</option>
-                </select>
-                <span class="invalid-feedback"><?php echo $city_err; ?></span>
-                <input type="hidden">
-            </div>  
     
             <div class="form-group">
                 <label>Password <span style="color:red;">*</span></label>
@@ -408,6 +369,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <input type="password" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $confirm_password; ?>"required>
                 <span class="invalid-feedback"><?php echo $confirm_password_err; ?></span>
             </div>
+
+            <div class="form-group">
+                <input type = "checkbox"  name="terms" value="1" class="<?php echo (!empty($terms_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $$terms; ?>"required> I Agree to 
+                <span class="invalid-feedback"><?php echo $terms_err; ?></span>
+            </div>
+
             <div class="form-group">
                 <input type="submit" class="btn btn-primary" value="Submit">
                 <input type="reset" class="btn btn-secondary ml-2" value="Reset">
