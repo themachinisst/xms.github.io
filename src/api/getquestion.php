@@ -1,36 +1,41 @@
 <?php
-
-
 require_once "../config.php";
 
-$sql = 'SELECT QuestionId, Question FROM masterquestions WHERE Status = ?';
+if(isset($_POST['Requirement'])){
+    $sql = 'SELECT QuestionId, Question FROM masterquestions WHERE (Requirement = ? OR Requirement = ? ) AND Status = ?';
 
-if($stmt = $mysqli->prepare($sql)){
-    
-    $status=1;
-    $stmt->bind_param("i", $status);
-    if($stmt -> execute()){
-        //store results
-        $stmt->store_result();
-        $stmt -> bind_result($questionId, $question);
-
-        if($stmt -> num_rows()>0)
-        {
-            $stmt -> fetch();
-            $quesionarr = array("QuestionId"=>$questionId, "Question"=>$question);
-            response($quesionarr);
+    if($stmt = $mysqli->prepare($sql)){
+        
+        $requirement = $_POST['Requirement'];
+        $generalRequirement = 0;
+        $status=1;
+        $stmt->bind_param("iii", $requirement, $generalRequirement, $status);
+        if($stmt -> execute()){
+            //store results
+            $stmt->store_result();
+            $stmt -> bind_result($questionId, $question);
+            $questionarr = array();
+            if($stmt -> num_rows()>0)
+            {
+                while($stmt -> fetch()) {
+                    $temp = array("QuestionId"=>$questionId, "Question"=>$question);
+                    array_push($questionarr, $temp);
+                }
+                response($questionarr);
+            }else{
+                response("False".mysqli_error($mysqli));
+            }
         }else{
-            response("False","No entries", NULL);
+            response("False".mysqli_error($mysqli));
         }
+        //close statement
+        $stmt->close();
     }else{
-        response("False","Failed", NULL);
+        response("False".mysqli_error($mysqli));
     }
-    //close statement
-    $stmt->close();
 }else{
-    response("False");
+    response("Missing parameters.");
 }
-
 
 function response($signoffMessage)
 {
