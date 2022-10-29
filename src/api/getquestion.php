@@ -7,9 +7,9 @@ if(isset($_POST['Requirement'])){
     if($stmt = $mysqli->prepare($sql)){
         
         $requirement = $_POST['Requirement'];
-        $generalRequirement = 0;
+        $generalRequirement = 'general';
         $status=1;
-        $stmt->bind_param("iii", $requirement, $generalRequirement, $status);
+        $stmt->bind_param("ssi", $requirement, $generalRequirement, $status);
         if($stmt -> execute()){
             //store results
             $stmt->store_result();
@@ -23,7 +23,7 @@ if(isset($_POST['Requirement'])){
                 }
                 response($questionarr);
             }else{
-                response("False".mysqli_error($mysqli));
+                response($questionarr);
             }
         }else{
             response("False".mysqli_error($mysqli));
