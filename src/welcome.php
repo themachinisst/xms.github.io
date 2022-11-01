@@ -1,7 +1,7 @@
 <?php
 
 //Initialize the session
-
+error_reporting(0);
 session_start();
 include_once('../src/api/jwt.php');
 
@@ -20,8 +20,34 @@ if(isset($_POST['ClientTypes'])){
     $url = 'http://localhost/xms/src/api/getquestion.php';
     $postData = array("Requirement" => $checked);
     $jsonResponse = rest_call('POST',$url, $postData,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+    $response = json_decode($jsonResponse, true);
+
+    $number_question = count($response['res']);
+    $_SESSION["questions"] = $response['res'];
 }
-// print_r($response);
+
+if(isset($_POST['responseSubmit'])){
+    $Id = $_SESSION["id"];
+    $tempRes = array();
+    $temp1 = array();
+    $number_question = count($_SESSION["questions"]);
+    $question = $_SESSION["questions"];
+     
+    $urlRes = 'http://localhost/xms/src/api/getresponse.php';
+    for($i=0;$i<$number_question;$i++){
+        
+        $temp = array("QuestionId"=>$question[$i]['QuestionId'], "Response"=>$_POST['response'.$i]);
+        array_push($temp1,$temp);
+    }
+    
+    $postDataRes = json_encode(array("Id"=>$Id, "responses"=>$temp1));
+    $jsonResponseRes = rest_call('POST',$urlRes, $postDataRes,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+    $responseRes =  json_decode($jsonResponseRes, true)['res'];
+    if($responseRes === 'success'){
+        
+    }
+
+}
 ?>
 
 <!DOCTYPE html>
@@ -55,13 +81,15 @@ if(isset($_POST['ClientTypes'])){
                 </li>
             </ul>
         </div>
-        <!-- Requirement Type  -->
-        <div id = "questionsBox">
-            
-        </div>
     </form>
+     <!-- Requirement Type  -->
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class = "questionsForm" name="questionsForm" id = "questionsForm">
+        <!-- Questions will be added from js-->
+        <input type = "hidden" value = "<?php if ($checked == 'Content') { ?>checked='checked' <?php } ?>">
+    </form>
+    <!-- Requirement Type  -->
     <p>
-        <a href="reset-password.php" class="btn btn-warning">Reset Your Password</a>
+        <a href="reset-password.php" class="btn btn-warning">Reset Password</a>
         <a href="logout.php" class="btn btn-danger ml-3">Sign Out</a>
     </p>
 </body>
@@ -76,15 +104,27 @@ if(isset($_POST['ClientTypes'])){
 
     if(RequirementContent.checked || RequirementDigital.checked || RequirementOnGround.checked || RequirementHybrid.checked){
         let javaScriptVar = <?php echo $jsonResponse; ?>;
-        console.log(javaScriptVar.res.length);
-        console.log(javaScriptVar.res);
+        // console.log(javaScriptVar.res[0].QuestionId);
         for(var i=0; i<javaScriptVar.res.length; i++){
-            document.getElementById('questionsBox').innerHTML += `
-                <div class = "question`+i+`">
-                    <p>`+javaScriptVar.res[i].Question+`</p>
+            document.getElementById('questionsForm').innerHTML += `
+                <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                    <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`</p>
+                    <input type = "text" name = "response`+(i)+`"  id= "response`+(i)+`" required/>
                 </div>
             `;
         }
+
+        document.getElementById('questionsForm').innerHTML +=`
+            <div class="form-group">
+                <input type = "checkbox"  name="terms" value="1" required> 
+                I Agree  
+                <a href="javascript:void(0);" class = "TermsConditionsText" id="mpopupLink">
+                    NDA
+                </a>
+                <span class="invalid-feedback"><?php echo $terms_err; ?></span>
+            </div>
+            <input type="submit" class="btn btn-primary" name = "responseSubmit" value="Submit">
+        `;
     }
 
 </script>
