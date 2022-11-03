@@ -9,4 +9,7 @@
     if($mysqli  === false){
         die("ERROR: Could not connect.. " . $mysqli->connect_error);
     }
+
+    //to verify sales code in register.php
+    $SalesCodeValid = array("AVS01", "ADS02", "BAS03", "PMC04", "KPC05", "MJC06");
 ?>
