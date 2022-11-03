@@ -9,8 +9,8 @@ $password_err = $confirm_password_err = "";
 
 
 //additional varibales 
-$name = $organization = $city = $subagency =  $email = $phone = $terms ="";
-$name_err = $organization_err = $city_err = $subagency_err =  $email_err =  $phone_err = $terms_err = "";
+$name = $organization = $city = $subagency =  $email = $phone = $terms = $radio = $salescode = "";
+$name_err = $organization_err = $city_err = $subagency_err =  $email_err =  $phone_err = $terms_err = $radio_err  = $salescode_err ="";
 
 
 
@@ -72,10 +72,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     //For user's name -----------END--------------------
 
+    //For radio button to be selected ----------START-------------------
+    if(!(isset($_POST["ClientType"]))){
+        $radio_err = "Please select one of the options.";
+    }else{
+        $radio = $_POST["ClientType"];
+    }
+
+    //For radio button to be selected -----------END--------------------
+
     //For user's organization ----------START-------------------
         
-    if((trim($_POST["Organization"]))){
+    // if((empty($_POST["Organization"])) && $radio == 'Client'){
+    if(empty(trim($_POST["Organization"])) && isset($_POST["ClientType"]) && $radio == "Client"){
         $organization_err = "Please enter a valid organization name.";
+        // $organization_err = $radio ;
     }else{
         //Prepare a select statement
         $sql = "SELECT Id from login WHERE Organization = ?";
@@ -134,13 +145,37 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     //For user's subagency -----------END--------------------
 
-    //For user's Gender ----------START-------------------
+    //For Sales Code  ----------START-------------------
+    if(empty(trim($_POST["SalesCode"]))){
+        $salescode_err = "Please enter a valid Sales Code, provided by our sales team.";
+    }else if(!in_array($_POST["SalesCode"], $SalesCodeValid)){
+        $salescode_err = "Incorrect Sales Code.";
+    }else{
+        //Prepare a select statement
+        $sql = "SELECT Id from login WHERE SalesCode = ?";
 
-     
-    //For user's Gender -----------END--------------------
-    //For user's BloodGroup ----------START-------------------
-     
-    //For user's  BloodGroup  -----------END--------------------
+        // $mysqli->prepare function is used to prepare an SQL statement for execution.
+        if($stmt = $mysqli->prepare($sql)){
+            //bind variabes to the prepared statement as parameters
+            $stmt->bind_param("s",  $param_salescode);
+
+            //set parameters
+            $param_salescode = trim($_POST["SalesCode"]);
+
+            //attempt to execute the prepared statement 
+            if($stmt->execute()){
+                
+                //store results
+                $stmt->store_result();
+                $salescode = trim($_POST["SalesCode"]);
+            }else{
+                echo "OOPs! Something went wrong. Please try again !";
+            }
+            //close statement
+            $stmt->close();
+        }
+    }
+    //For Sales Code  -----------END--------------------
 
 
 
@@ -149,7 +184,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     //validate name
     if(empty(trim($_POST["Email"]))){
         $email_err = "Please enter a valid email.";
-    }elseif(!preg_match('/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$/', trim($_POST["Email"]))){
+    }elseif(!preg_match('/^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-zA-Z]$/', trim($_POST["Email"]))){
         $email_err = "Please enter a valid email ID.";
     }else{
         //Prepare a select statement
@@ -224,21 +259,22 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     //For checking terms and condition's checkbox  ----------END-------------------
 
 
-    //Check input errors before inserting in data base
-    if(empty($password_err) && empty($confirm_password_err) && empty($name_err) && empty($organization_err) && empty($subagency_err) && empty($email_err) && empty($phone_err)){
+    //Check input errors before inserting in data base  salescode_err
+    if(empty($password_err) && empty($confirm_password_err) && empty($name_err) && empty($radio_err) && empty($salescode_err) && empty($organization_err) && empty($email_err) && empty($phone_err)){
             
         // Prepare an insert statement
-        $sql = "INSERT INTO login (Password, Name, Organization, SubAgency, Email, Phone) VALUES (?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO login (Password, Name, Organization, SubAgency, Email, SalesCode, Phone) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         if($stmt = $mysqli->prepare($sql)){
             //Bind variables to the prepared statement as parameters
-            $stmt->bind_param("sssssi", $param_password, $param_name, $param_organization, $param_subagency, $param_email, $param_phone);
+            $stmt->bind_param("ssssssi", $param_password, $param_name, $param_organization, $param_subagency, $param_email, $param_salescode, $param_phone);
 
             //set parameters 
             $param_name = $name;
             $param_organization = $organization;
             $param_subagency = $subagency;
             $param_email = $email;
+            $param_salescode = $salescode;
             $param_phone = $phone;
             
 
@@ -273,7 +309,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="../style/main.css">
     <link rel="stylesheet" href="../style/register_style.css">
-    <script type="text/javascript" src="../js/register.js"></script>
+    <script type="text/javascript" src="./js/register.js"></script>
     <style>
         body{ font: 14px sans-serif; }
         .wrapper{ width: 360px; padding: 20px; }
@@ -296,6 +332,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     {
         document.frm.submit();
     }
+
+    function validateText(elem) {
+        // var element = document.getElementById(elem.id);
+        if(elem.name === 'Name'){
+            elem.value = elem.value.replace(/[^a-zA-Z]+/, '');
+        }else if(elem.name === 'Phone'){
+            elem.value = elem.value.replace(/[^0-9]+/, '');
+        }
+    };
 </script>
 <body>
 <div class="split left">
@@ -314,13 +359,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm" id="frm" class = "frm">
             <div class="form-group">
                 <label>Name <span style="color:red;">*</span></label>
-                <input type="text" name="Name" class="form-control <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $name; ?>" required>
+                <input type="text" name="Name" onkeyup="validateText(this);" class="form-control <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $name; ?>" required>
                 <span class="invalid-feedback"><?php echo $name_err; ?></span>
             </div>  
         
             <div class="form-group">
                 <label>Phone <span style="color:red;">*</span></label>
-                <input type="tel" maxlength="10" name="Phone" class="form-control <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $phone; ?>" required>
+                <input type="number" maxlength="10" name="Phone" onkeyup="validateText(this);" class="form-control <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $phone; ?>" required>
                 <span class="invalid-feedback"><?php echo $phone_err; ?></span>
             </div>  
 
@@ -330,18 +375,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <span class="invalid-feedback"><?php echo $email_err; ?></span>
             </div>  
 
+            <div class="form-group">
+                <label>Sales Code <span style="color:red;">*</span></label>
+                <input type="text" pattern="[a-zA-Z0-9]+" name="SalesCode" class="form-control <?php echo (!empty($salescode_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $salescode; ?>"required>
+                <span class="invalid-feedback"><?php echo $salescode_err; ?></span>
+            </div>
+
             <!-- Client Type  -->
             <div class="form-group">
                 <br/>
                 <ul>
                     <li class = "ClientTypes">
-                        <input type="radio" name="ClientTypes"  value="Client" id="ClientTypesClient" onclick="displayClientInfo(this)"/>
+                        <input type="radio" name="ClientType"  <?php if ($radio == 'Content') { ?>checked='checked' <?php } ?>  class="<?php echo (!empty($radio_err)) ? 'is-invalid' : ''; ?>" value="Client" id="ClientTypesClient" onclick="displayClientInfo(this)"/>
                         <label class = "ClientTypesRadioBtns" >Client</label>
-                        <input type="radio" name="ClientTypes"  value="Agency" id="ClientTypesAgency" onclick="displayClientInfo(this)"/>
+                        <input type="radio" name="ClientType"  <?php if ($radio == 'Content') { ?>checked='checked' <?php } ?>  class="<?php echo (!empty($radio_err)) ? 'is-invalid' : ''; ?>"  value="Agency" id="ClientTypesAgency" onclick="displayClientInfo(this)"/>
                         <label class = "ClientTypesRadioBtns" >Agency</label>
+                    <span class="invalid-feedback"><?php echo $radio_err; ?></span>
                     </li>
                 </ul>
             </div>
+            
             <!-- Client Type  -->
 
             <div class="form-group client">
@@ -352,7 +405,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             </div>    
 
             <div class="form-group agency">
-                <label>Sub Agency Name <span style="color:red;">*</span></label>
+                <label>Sub Agency Name </label>
                     <input type="text" name="SubAgency" class="form-control <?php echo (!empty($subagency_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $subagency; ?>">
                     </input>
                 <span class="invalid-feedback"><?php echo $subagency_err; ?></span>
@@ -361,17 +414,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     
             <div class="form-group">
                 <label>Password <span style="color:red;">*</span></label>
-                <input type="password" name="Password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $password; ?>"required>
+                <input type="password" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false"  name="Password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $password; ?>"  required>
                 <span class="invalid-feedback"><?php echo $password_err; ?></span>
             </div>
             <div class="form-group">
                 <label>Confirm Password <span style="color:red;">*</span></label>
-                <input type="password" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $confirm_password; ?>"required>
+                <input type="password" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $confirm_password; ?>"  required>
                 <span class="invalid-feedback"><?php echo $confirm_password_err; ?></span>
             </div>
 
             <div class="form-group">
-                <input type = "checkbox"  name="terms" value="1" class="<?php echo (!empty($terms_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $$terms; ?>"required> I Agree to 
+                <input type = "checkbox"  name="terms" value="1" class="<?php echo (!empty($terms_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $$terms; ?>"required> 
+                I Agree to 
+                <a href="javascript:void(0);" class = "TermsConditionsText" id="mpopupLink">
+                        Terms And Conditions
+                </a>
                 <span class="invalid-feedback"><?php echo $terms_err; ?></span>
             </div>
 
@@ -381,7 +438,71 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             </div>
             <p>Already have an account? <a href="login.php">Login here</a>.</p>
         </form>
+        
     </div>    
+
 </div>
+
+<!-- Modal popup box - START -->
+<div id="mpopupBox" class="mpopup">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Terms and Conditions content</h2>
+            <span class="close">×</span>
+        </div>
+        <div class="modal-body">
+           <p>Insert content here...</p>
+            <p>Insert content here...</p>
+            <p>Insert content here...</p>
+            <p>Insert content here...</p>
+            <p>Insert content here...</p>
+            <p>Insert content here...</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" id = "goBackBtn" class="btn btn-primary">Go back</button>
+        </div>
+    </div>
+</div>
+<!-- Modal popup box - END -->
+
 </body>
+
+<script>
+// For modal popup - START
+// Select modal
+var mpopup = document.getElementById('mpopupBox');
+
+// Select trigger link
+var mpLink = document.getElementById("mpopupLink");
+
+// Select close action element
+var close = document.getElementsByClassName("close")[0];
+
+
+// Select close action element
+var goBackBtn = document.getElementById("goBackBtn");
+
+// Open modal once the link is clicked
+mpLink.onclick = function() {
+    mpopup.style.display = "block";
+};
+
+// Close modal once close element is clicked
+close.onclick = function() {
+    mpopup.style.display = "none";
+};
+
+// Close modal once goBackBtn button is clicked
+goBackBtn.onclick = function() {
+    mpopup.style.display = "none";
+};
+
+// Close modal when user clicks outside of the modal box
+window.onclick = function(event) {
+    if (event.target == mpopup) {
+        mpopup.style.display = "none";
+    }
+};
+// For modal popup - END
+</script>
 </html>
