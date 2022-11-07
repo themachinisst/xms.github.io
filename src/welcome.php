@@ -35,6 +35,7 @@ if(isset($_POST['responseSubmit'])){
     $question = $_SESSION["questions"];
      
     $urlRes = 'http://localhost/xms/src/api/getresponse.php';
+    $urlgen = 'http://localhost/xms/src/api/generatepdf.php';
     for($i=0;$i<$number_question;$i++){
         $temp = array("QuestionId"=>$question[$i]['QuestionId'], "Response"=>$_POST['response'.$i]);
         array_push($temp1,$temp);
@@ -45,10 +46,36 @@ if(isset($_POST['responseSubmit'])){
     $jsonResponseRes = rest_call('POST',$urlRes, $postDataRes,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
     $responseRes =  json_decode($jsonResponseRes, true)['res'];
     if($responseRes === 'success'){
-        
-    }
 
+        
+        // $postDatagen = array("Id"=>$Id);
+        // $jsonResponsegen = rest_call('POST',$urlgen ,$postDatagen,$responsegen,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+        // $responsegen = json_decode($jsonResponsegen, true);
+        //  echo $Id;
+        // //echo $jsonResponsegen;
+        // //echo'done';
+        // }else{
+        //     echo 'something went wrong';
+        // }
+  
 }
+
+if(isset($_POST['responseSubmit'])){
+    $Id = $_SESSION["id"];
+    //if($responseRes === 'success'){
+    $urlgen = 'http://localhost/xms/src/api/generatepdf.php';
+    $postDatagen = array("Id"=>$Id);
+    $jsonResponsegen = rest_call('POST',$urlgen ,$postDatagen,$responsegen,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+    $responsegen = json_decode($jsonResponsegen, true);
+    //echo $Id;
+    print_r($postDatagen);
+    print_r($jsonResponsegen);
+    //echo'done';
+    }else{
+        echo 'something went wrong';
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
