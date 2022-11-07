@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/gutenberg-css@0.6">
+    <style>
+        /* table {
+            width: 100%;
+        }
+        footer {
+            text-align: center;
+            font-style: italic;
+        } */
+       
+        table {
+         font-family: arial, sans-serif;
+         border-collapse: collapse;
+         width: 100%; 
+        }
+
+        td, th {
+         /* background-color: #dddddd; */
+         border: 1px solid #dddddd;
+         text-align: left;
+         padding: 8px;
+        }
+
+        tr:nth-child(even) {
+         border: 1px solid #dddddd;
+         /* background-color: #dddddd; */
+        }
+
+        p{
+         font-family: arial, sans-serif;
+         border-collapse: collapse;
+         width: 100%;  
+        }
+        h4{
+         font-family: arial, sans-serif;
+         text-align: center;
+        }
+        h1{
+         font-family: arial, sans-serif; 
+        }
+        
+        
+    </style>
+</head>
+<body>
+    
+    <!-- <img src="../assets/logo.png"> -->
+    <img src="../assets/logo.png">
+    
+    <h1>Document</h1>
+    
+    
+    <p>Name: {{ Name }}</p>
+    <p>Email: {{ Email }}</p>
+    <p>SalesCode: {{ SalesCode }}</p>
+    <p>Phone: {{ Phone }}</p>
+    <p>Organization: {{ Organization }}</p>
+    <p>SubAgency: {{ SubAgency }}</p>
+    
+    
+    <table >
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Requirement</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+			{{ Table }}
+			<!--
+                <td style="text-align: left">{{ Question }}</td>
+                <td style="text-align: middle">{{ Response }}</td>
+                <td style="text-align: right">{{ Requirement }}</td>
+                
+                <td>{{ Question }}</td>
+                <td>{{ Response }}</td>
+                <td>{{ Requirement }}</td> -->
+            </tr>
+            
+        </tbody>
+    </table>
+    
+    
+    <footer>
+        <h4>Thank You</h4>
+    </footer>
+    
+</body>
+</html>
