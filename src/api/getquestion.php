@@ -1,6 +1,38 @@
 <?php
 require_once "../config.php";
 
+
+function returnRadioBtnOptions($mysqli, $QuestionId){
+    $radioId = "";
+    $optionText = "";
+    $sql = 'SELECT RadioId, OptionText FROM RadioBtnOptions WHERE Status = ? AND QuestionId = ?';
+    $options = array();
+    if($stmt = $mysqli->prepare($sql)){
+        $status = 1;
+        $temp = array();
+        $stmt->bind_param("is",  $status, $QuestionId);
+        if($stmt -> execute()){
+            $stmt->store_result();
+            $stmt -> bind_result($radioId, $optionText);
+            if($stmt -> num_rows()>0){
+                while($stmt -> fetch()) {
+                    $temp = array("OptionId"=>$radioId, "OptionText"=>$optionText);
+                    array_push($options, $temp);
+                }
+                return $options;
+            }else{
+                return $options;
+            }
+        }else{
+            return $options = "Fail".mysqli_error($mysqli);
+        }
+    }else{
+        return $options = "Fail".mysqli_error($mysqli);
+    }
+
+}
+
+
 function returnDropDownOptions($mysqli, $QuestionId){
     $optionId = "";
     $optionText = "";
@@ -49,15 +81,15 @@ if(isset($_POST['Requirement'])){
             if($stmt -> num_rows()>0)
             {
                 while($stmt -> fetch()) {
-                    if($responseType){
+                    if($responseType == 'dropdown'){
                         $options = array(returnDropDownOptions($mysqli, $questionId));
+                        $temp = array("QuestionId"=>$questionId, "Question"=>$question, "ResponseType"=>$responseType, "Options"=>$options);
+                    }else if($responseType == 'radiobutton'){
+                        $options = array(returnRadioBtnOptions($mysqli, $questionId));
                         $temp = array("QuestionId"=>$questionId, "Question"=>$question, "ResponseType"=>$responseType, "Options"=>$options);
                     }else{
                         $temp = array("QuestionId"=>$questionId, "Question"=>$question, "ResponseType"=>$responseType);
                     }
-
-                    
-
                     array_push($questionarr, $temp);
                 }
                 response($questionarr);

@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
 header("Content-Type: application/json");
 header("Acess-Control-Allow-Origin: *");
 header("Acess-Control-Allow-Methods: POST");
@@ -8,25 +8,36 @@ header("Acess-Control-Allow-Headers: Acess-Control-Allow-Headers,Content-Type,Ac
 include '../config.php'; // include database connection file
 
 $data = json_decode(file_get_contents("php://input"), true); // collect input parameters and convert into readable format
-	
-$fileName  =  $_FILES['sendimage']['name'];
-$tempPath  =  $_FILES['sendimage']['tmp_name'];
-$fileSize  =  $_FILES['sendimage']['size'];
+	// print_r("in".$data);
+$fileName  =  $_FILES['file']['name'];
+$tempPath  =  $_FILES['file']['tmp_name'];
+$fileSize  =  $_FILES['file']['size'];
 		
 // echo $fileName ;
 // echo $tempPath ;
 // echo $fileSize ;
 
-if(empty($fileName) || !isset($_POST['Id']))
+if(empty($fileName) || !isset($_POST['Id']) || empty($_POST['Id']))
 {
-	$errorMSG = json_encode(array("message" => "Incorrect parameters", "status" => false));	
+	$errorMSG = json_encode(array("message" => $fileName.$_POST['Id'], "status" => false));	
 	echo $errorMSG;
 }
 else
 {
     $Id = $_POST['Id'];
+	
+	$base_path = 'http://localhost/xms/src/uploads/';
 	$upload_path = '../uploads/'; // set upload folder path 
-	$basepath = 'http://localhost/xms/src/uploads/';
+
+	// echo "OUT";
+	if(!is_dir($base_path.$Id)){
+		mkdir($base_path.$Id, 0777, true);
+		$folder_path = $base_path.$Id;
+		
+	}
+
+
+	// $basepath = 'http://localhost/xms/src/uploads/';
 	$fileExt = strtolower(pathinfo($fileName,PATHINFO_EXTENSION)); // get image extension
 		
 	// valid image extensions
@@ -41,7 +52,7 @@ else
 			// check file size '5MB'
 			if($fileSize < 5000000){
 				move_uploaded_file($tempPath, $upload_path . $fileName); // move file from system temporary path to our upload folder path 
-                $url = $basepath.$fileName;
+                $url = $folder_path.'/'.$fileName;
                 // echo $url;
 			}
 			else{		
@@ -75,7 +86,7 @@ if(!isset($errorMSG))
     if($stmt = $mysqli->prepare($sql)){
         $stmt->bind_param("iss", $Id, $url, $fileName);
         if($stmt -> execute()){
-            echo json_encode(array("message" => "Image Uploaded Successfully", "status" => true));	
+            echo json_encode(array("message" => $url, "status" => true));	
         }else{
             return $options = "Fail".mysqli_error($mysqli);
         }

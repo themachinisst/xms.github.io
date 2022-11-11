@@ -175,11 +175,11 @@ if(isset($_POST['Id']) && !empty($_POST['Id'])){
     //     echo 'invaild';
     
     //  }
-     $pdfpath="http://localhost/xms/src/api/$Id.$Name.pdf";
+     $pdfpath="http://localhost/xms/src/api/".$Id."_".$Name.".pdf";
     
     response($pdfpath); 
     }else{
-        echo $userArrayResponse;
+        // echo $userArrayResponse;
         if($userArrayResponse == false) 
             $var = "";
         if($resArrayResponse == false)
