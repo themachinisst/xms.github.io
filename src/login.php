@@ -13,8 +13,8 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
 require_once "config.php";
 
 //Define variables and initialize with empty values
-$email = $password = "";
-$email_err = $password_err = $login_err = "";
+$email = $password = $name = "";
+$email_err = $password_err = $login_err = $name_err ="";
 
 //Processing from data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -36,7 +36,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     //validate credentirals 
     if(empty($email_err) && empty($password_err)) {
         //Prepare a select statement
-        $sql = "SELECT Id, Email, Password FROM login WHERE Email = ?";
+        $sql = "SELECT Id, Email, Name, Password FROM login WHERE Email = ?";
 
         if($stmt = $mysqli->prepare($sql)){
             //Bind variables to the prepared statment as parameters 
@@ -52,7 +52,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 //check if email exists, if yes then verify the password
                 if($stmt->num_rows==1){
                     //Bind result variables 
-                    $stmt->bind_result($id, $email, $hashed_password);
+                    $stmt->bind_result($id, $email, $name, $hashed_password);
 
                     if($stmt->fetch()){
                         if(password_verify($password, $hashed_password)){
@@ -63,8 +63,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
                             $_SESSION["loggedin"] = true;
                             $_SESSION["id"] = $id;
-                            $_SESSION["Email"] = $email;
-                            //$_SESSION["name"] = $name;
+                            $_SESSION["email"] = $email;
+                            $_SESSION["name"] = $name;
 
                             //Redirect user to welcome page
                             header("location: welcome.php");
