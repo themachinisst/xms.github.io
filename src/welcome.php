@@ -4,6 +4,7 @@
 error_reporting(0);
 session_start();
 include_once('../src/api/jwt.php');
+include('./config.php');
 
 //Check if the user is logged in, if not then redirect him to login page
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
@@ -13,31 +14,47 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 
 $checked = "";
 $jsonResponse = "0";
+$Id = $_SESSION["id"];
 
-if(isset($_POST['ClientTypes'])){
-    $checked = $_POST['ClientTypes'];
 
-    $url = 'http://localhost/xms/src/api/getquestion.php';
+
+if(isset($_POST['RequirementTypes'])){
+    $checked = $_POST['RequirementTypes'];
+
+    $url = $basepath.'api/getquestion.php';
     $postData = array("Requirement" => $checked);
     $jsonResponse = rest_call('POST',$url, $postData,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
     $response = json_decode($jsonResponse, true);
 
     $number_question = count($response['res']);
-    // print_r($response['res']);
+    print_r($response['res']);
     $_SESSION["questions"] = $response['res'];
 }
 
 if(isset($_POST['responseSubmit'])){
-    $Id = $_SESSION["id"];
+
     $tempRes = array();
     $temp1 = array();
     $number_question = count($_SESSION["questions"]);
     $question = $_SESSION["questions"];
+
      
-    $urlRes = 'http://localhost/xms/src/api/getresponse.php';
-    $urlgen = 'http://localhost/xms/src/api/generatepdf.php';
+    $urlRes = $basepath.'api/getresponse.php';
     for($i=0;$i<$number_question;$i++){
-        $temp = array("QuestionId"=>$question[$i]['QuestionId'], "Response"=>$_POST['response'.$i]);
+
+        // for file upload 
+        if($question[$i]['ResponseType'] === "file" && empty($_POST['response'.$i])){
+            continue;
+        }else if($question[$i]['ResponseType'] === "file" && isset($_POST['response'.$i]) && !empty($_POST['response'.$i])){
+            $formRespones = $basepath.$Id.'/'.$_POST['response'.$i];
+        }else if($question[$i]['ResponseType'] === "radiobutton" && isset($_POST['response'.$i])){
+            echo "in";
+            print_r($_POST['response'.$i]);
+        }else{
+            $formRespones = $_POST['response'.$i];
+        }
+
+        $temp = array("QuestionId"=>$question[$i]['QuestionId'], "Response"=>$formRespones);
         array_push($temp1,$temp);
     }
     
@@ -46,36 +63,10 @@ if(isset($_POST['responseSubmit'])){
     $jsonResponseRes = rest_call('POST',$urlRes, $postDataRes,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
     $responseRes =  json_decode($jsonResponseRes, true)['res'];
     if($responseRes === 'success'){
-
-        
-        // $postDatagen = array("Id"=>$Id);
-        // $jsonResponsegen = rest_call('POST',$urlgen ,$postDatagen,$responsegen,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
-        // $responsegen = json_decode($jsonResponsegen, true);
-        //  echo $Id;
-        // //echo $jsonResponsegen;
-        // //echo'done';
-        // }else{
-        //     echo 'something went wrong';
-        // }
-  
-}
-
-if(isset($_POST['responseSubmit'])){
-    $Id = $_SESSION["id"];
-    //if($responseRes === 'success'){
-    $urlgen = 'http://localhost/xms/src/api/generatepdf.php';
-    $postDatagen = array("Id"=>$Id);
-    $jsonResponsegen = rest_call('POST',$urlgen ,$postDatagen,$responsegen,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
-    $responsegen = json_decode($jsonResponsegen, true);
-    //echo $Id;
-    print_r($postDatagen);
-    print_r($jsonResponsegen);
-    //echo'done';
-    }else{
-        echo 'something went wrong';
+        // reduirect to thank you page
     }
-}
 
+}
 ?>
 
 <!DOCTYPE html>
@@ -83,8 +74,7 @@ if(isset($_POST['responseSubmit'])){
 <head>
     <meta charset="UTF-8">
     <title>Welcome</title>
-    <link rel="stylesheet" href=
-"https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <script src="https://kit.fontawesome.com/577845f6a5.js" 
         crossorigin="anonymous">
     </script>
@@ -94,37 +84,88 @@ if(isset($_POST['responseSubmit'])){
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="./js/welcome.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="../style/welcome_style.css">
+    <link rel="stylesheet" href="../style/main.css">
     <style>
         body{ font: 14px sans-serif; text-align: center; }
     </style>
+
 </head>
+
+<!-- for file upload api - START  -->
+<script>
+if($("input[name='RequirementTypes']").prop("checked")){
+    document.getElementById("responseSubmit").addEventListener("click", function(event){
+            $('#responseSubmit').on('click', function (e) {
+                // console.log('<?php echo $Id;?>');
+                let files = new FormData(), // you can consider this as 'data bag'
+                url = 'http://localhost/xms/src/api/uploadfile.php';
+                
+                files.append('file', $('#file')[0].files[0]); // append selected file to the bag named 'file'
+                files.append('Id', '<?php echo $Id ?>');
+                $.ajax({
+                    type: 'post',
+                    url: url,
+                    processData: false,
+                    contentType: false,
+                    data: files,
+                    success: function (response) {
+                        console.log(response);
+                    },
+                    error: function (err) {
+                        console.log(err);
+                    }
+                });
+            });
+            event.preventDefault();
+        });
+    }
+</script>
+<!-- for file upload api - START  -->
 <body>
-    <h1 class="my-5">Hello, <b><?php echo htmlspecialchars($_SESSION["Email"]); ?></b></h1>
+
     <!-- Requirement Type  -->
-    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm" id="frm" class = "frm">
-        <div class="form-group">
+    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm1" id="frm1" class = "frm1">
+        <div class="form-group"  >
             <br/>
-            <ul>
-                <li class = "ClientTypes">
-                    <input type="radio" name="ClientTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit();"/>
-                    <label class = "ClientTypesRadioBtns" >Content</label>
-                    <input type="radio" name="ClientTypes"   <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit();"/>
-                    <label class = "ClientTypesRadioBtns" >Digital</label>
-                    <input type="radio" name="ClientTypes"   <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?>  value="On Ground" id="RequirementOnGround" onChange="autoSubmit();"/>
-                    <label class = "ClientTypesRadioBtns" >On Ground</label>
-                    <input type="radio" name="ClientTypes"   <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?>  value="Hybrid" id="RequirementHybrid" onChange="autoSubmit();"/>
-                    <label class = "ClientTypesRadioBtns" >Hybrid</label>
-                </li>
-            </ul>
+            <h2 class="my-5">Alright !  <b><?php echo htmlspecialchars($_SESSION["name"]); ?></b> let's see what you got</h2>
+            <h4 class="my-5">Select your campaign activation platform</h4>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-primary">
+                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit();"/>
+                    Content
+                </label>
+                <!-- <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit();"/>
+                <label class = "RequirementTypesRadioBtns" >Content</label> -->
+                <label class="btn btn-primary">
+                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit();"/>
+                    Digital
+                </label>
+                <!-- <input type="radio" name="RequirementTypes"   <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit();"/>
+                <label class = "RequirementTypesRadioBtns" >Digital</label> -->
+                <label class="btn btn-primary">
+                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?> value="On Ground" id="RequirementOnGround" onChange="autoSubmit();"/>
+                    On Ground
+                </label>
+                <!-- <input type="radio" name="RequirementTypes"   <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?>  value="On Ground" id="RequirementOnGround" onChange="autoSubmit();"/>
+                <label class = "RequirementTypesRadioBtns" >On Ground</label> -->
+                <label class="btn btn-primary">
+                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?> value="Hybrid" id="RequirementHybrid" onChange="autoSubmit();"/>
+                    Hybrid
+                </label>
+                <!-- <input type="radio" name="RequirementTypes"   <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?>  value="Hybrid" id="RequirementHybrid" onChange="autoSubmit();"/>
+                <label class = "RequirementTypesRadioBtns" >Hybrid</label> -->
+            </div>
         </div>
     </form>
      <!-- Requirement Type  -->
+     <!-- Questions Type  -->
     <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class = "questionsForm" name="questionsForm" id = "questionsForm">
         <!-- Questions will be added from js-->
         <input type = "hidden" value = "<?php if ($checked == 'Content') { ?>checked='checked' <?php } ?>">
     </form>
-    <!-- Requirement Type  -->
+    <!-- Questions Type  -->
     <p>
         <a href="reset-password.php" class="btn btn-warning">Reset Password</a>
         <a href="logout.php" class="btn btn-danger ml-3">Sign Out</a>
@@ -169,7 +210,7 @@ if(isset($_POST['responseSubmit'])){
             if(javaScriptVar.res[i].ResponseType === "text"){
                 document.getElementById('questionsForm').innerHTML += `
                     <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
-                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`</p>
+                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
                         <input type = "text" name = "response`+(i)+`"  id= "response`+(i)+`" required/>
                     </div>
                 `;
@@ -186,19 +227,39 @@ if(isset($_POST['responseSubmit'])){
 
                 // console.log(javaScriptVar.res[i].Options[0]);
                 // For dropdown options - START 
-                let optionsArray = javaScriptVar.res[i].Options[0];
+                let dropdownoptionsArray = javaScriptVar.res[i].Options[0];
                 
-                for(j=0;j<optionsArray.length;j++){
-                    console.log(optionsArray[j]);
+                for(j=0;j<dropdownoptionsArray.length;j++){
+                    // console.log(optionsArray[j]);
                     document.getElementById('response'+(i)).innerHTML += `
-                        <option value = "`+optionsArray[j].OptionText+`">`+optionsArray[j].OptionText+`</option>
+                        <option value = "`+dropdownoptionsArray[j].OptionText+`">`+dropdownoptionsArray[j].OptionText+`</option>
                     `;        
                 }
                 // For dropdown options - END
-                
+            }else if(javaScriptVar.res[i].ResponseType === "radiobutton"){
+                // console.log( javaScriptVar.res[i].Options[0]);
+                let radiobtnoptionsArray = javaScriptVar.res[i].Options[0];
+                document.getElementById('questionsForm').innerHTML += `
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons" id = "radiotext`+(i)+`">
+                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                    </div>  
+                    `;  
+
+                for(j=0;j<radiobtnoptionsArray.length;j++){
+                    // console.log(optionsArray[j]);
+                    document.getElementById('radiotext'+(i)).innerHTML += `
+                        <label class="btn btn-primary" for="radiobtn`+j+`"><input style= "display:none;" type="radio" name="radiotext" value="`+radiobtnoptionsArray[j].OptionText+`" id="radiobtn`+radiobtnoptionsArray[j].OptionId+`">`+radiobtnoptionsArray[j].OptionText+`</label>
+                    `;        
+                }
+
+            }else if(javaScriptVar.res[i].ResponseType === "file"){
+                document.getElementById('questionsForm').innerHTML += `
+                    <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`</p>
+                        <input type = "file" name = "response`+(i)+`" id= "file" />
+                    </div>
+                `;
             }
-
-
         }
 
 
@@ -210,11 +271,10 @@ if(isset($_POST['responseSubmit'])){
                     NDA
                 </a>
                 <span class="invalid-feedback"></span>
-            </div>
-            <input type="submit" class="btn btn-primary" name = "responseSubmit" value="Submit">
+            </div>  
+            <input type="submit" class="btn btn-primary" name = "responseSubmit" id = "responseSubmit" value="Submit">
         `;
     
-
         // For modal popup - START
         // Select modal
         var mpopup = document.getElementById('mpopupBox');
@@ -252,8 +312,6 @@ if(isset($_POST['responseSubmit'])){
         };
         // For modal popup - END
     }
-
-
 
 </script>
 </html>
