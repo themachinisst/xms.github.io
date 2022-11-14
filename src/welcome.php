@@ -27,7 +27,7 @@ if(isset($_POST['RequirementTypes'])){
     $response = json_decode($jsonResponse, true);
 
     $number_question = count($response['res']);
-    print_r($response['res']);
+    // print_r($response['res']);
     $_SESSION["questions"] = $response['res'];
 }
 
@@ -59,7 +59,7 @@ if(isset($_POST['responseSubmit'])){
     }
     
     $postDataRes = json_encode(array("Id"=>$Id, "responses"=>$temp1));
-    print_r($postDataRes);
+    // print_r($postDataRes);
     $jsonResponseRes = rest_call('POST',$urlRes, $postDataRes,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
     $responseRes =  json_decode($jsonResponseRes, true)['res'];
     if($responseRes === 'success'){
@@ -124,54 +124,72 @@ if($("input[name='RequirementTypes']").prop("checked")){
 </script>
 <!-- for file upload api - START  -->
 <body>
-
-    <!-- Requirement Type  -->
-    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm1" id="frm1" class = "frm1">
-        <div class="form-group"  >
-            <br/>
-            <h2 class="my-5">Alright !  <b><?php echo htmlspecialchars($_SESSION["name"]); ?></b> let's see what you got</h2>
-            <h4 class="my-5">Select your campaign activation platform</h4>
-            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-primary">
-                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit();"/>
-                    Content
-                </label>
-                <!-- <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit();"/>
-                <label class = "RequirementTypesRadioBtns" >Content</label> -->
-                <label class="btn btn-primary">
-                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit();"/>
-                    Digital
-                </label>
-                <!-- <input type="radio" name="RequirementTypes"   <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit();"/>
-                <label class = "RequirementTypesRadioBtns" >Digital</label> -->
-                <label class="btn btn-primary">
-                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?> value="On Ground" id="RequirementOnGround" onChange="autoSubmit();"/>
-                    On Ground
-                </label>
-                <!-- <input type="radio" name="RequirementTypes"   <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?>  value="On Ground" id="RequirementOnGround" onChange="autoSubmit();"/>
-                <label class = "RequirementTypesRadioBtns" >On Ground</label> -->
-                <label class="btn btn-primary">
-                    <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?> value="Hybrid" id="RequirementHybrid" onChange="autoSubmit();"/>
-                    Hybrid
-                </label>
-                <!-- <input type="radio" name="RequirementTypes"   <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?>  value="Hybrid" id="RequirementHybrid" onChange="autoSubmit();"/>
-                <label class = "RequirementTypesRadioBtns" >Hybrid</label> -->
-            </div>
+    <div class = "parent">
+        <!-- Left direction block - START -->
+        <div class = "left-child" >
+            <img src="../assets/left_arrow.png"/>
         </div>
-    </form>
-     <!-- Requirement Type  -->
-     <!-- Questions Type  -->
-    <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class = "questionsForm" name="questionsForm" id = "questionsForm">
-        <!-- Questions will be added from js-->
-        <input type = "hidden" value = "<?php if ($checked == 'Content') { ?>checked='checked' <?php } ?>">
-    </form>
-    <!-- Questions Type  -->
-    <p>
-        <a href="reset-password.php" class="btn btn-warning">Reset Password</a>
-        <a href="logout.php" class="btn btn-danger ml-3">Sign Out</a>
-    </p>
+        <!-- Left direction block - END -->
 
-    
+        <!-- Centre Block - START-->
+        <div class = "child">
+
+            <!-- Requirement Type  -->
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm1" id="frm1" class = "frm1">
+                <div class="form-group" >
+                    <br/>
+                    <p class="MainTitle"><b>Alright !  <b><?php echo htmlspecialchars($_SESSION["name"]); ?></b> let's see what you got</b></p>
+                    <p class="Text">Select your campaign activation platform</p>
+                    <br/>
+                    <br/>
+                    <div class="btn-group-toggle" data-toggle="buttons">
+                        <label class="btn radiobtn">
+                            Content
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit(frm1);"/>
+                        </label>
+                        
+                        <label class="btn radiobtn">
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit(frm1);"/>
+                            Digital
+                        </label>
+                    
+                        <label class="btn radiobtn">
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?> value="On Ground" id="RequirementOnGround" onChange="autoSubmit(frm1);"/>
+                            On Ground
+                        </label>
+                        
+                        <label class="btn radiobtn">
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?> value="Hybrid" id="RequirementHybrid" onChange="autoSubmit(frm1);"/>
+                            Hybrid
+                        </label>
+                        
+                    </div>
+                </div>
+            </form>
+            <!-- Requirement Type  -->
+
+            <!-- Questions Type  -->
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class = "questionsForm" name="questionsForm" id = "questionsForm">
+                <!-- Questions will be added from js-->
+                <input type = "hidden" value = "<?php if ($checked == 'Content') { ?>checked='checked' <?php } ?>">
+            </form>
+            <!-- Questions Type  -->
+
+            <!-- <p>
+                <a href="reset-password.php" class="btn btn-warning">Reset Password</a>
+                <a href="logout.php" class="btn btn-danger ml-3">Sign Out</a>
+            </p> -->
+        </div>
+        <!-- Centre Block - END-->
+
+        <!-- Right direction block - START-->
+        <div class = "right-child">
+            <img src="../assets/right_arrow.png"/>
+        </div>
+        <!-- Right direction block - END -->
+    </div>
+
+
     <!-- Modal popup box - START -->
     <div id="mpopupBox" class="mpopup">
         <div class="modal-content">
@@ -205,7 +223,17 @@ if($("input[name='RequirementTypes']").prop("checked")){
 
     if(RequirementContent.checked || RequirementDigital.checked || RequirementOnGround.checked || RequirementHybrid.checked){
         let javaScriptVar = <?php echo $jsonResponse; ?>;
-        // console.log(javaScriptVar.res[0].QuestionId);
+        
+        //  page counter 
+        let counter = 0
+
+        // hide requirement radio buttons 
+        document.getElementById("frm1").style.display  = "none";
+
+        // add onclick function navigation functions 
+        document.getElementById("frm1")
+
+
         for(var i=0; i<javaScriptVar.res.length; i++){
             if(javaScriptVar.res[i].ResponseType === "text"){
                 document.getElementById('questionsForm').innerHTML += `
@@ -240,15 +268,20 @@ if($("input[name='RequirementTypes']").prop("checked")){
                 // console.log( javaScriptVar.res[i].Options[0]);
                 let radiobtnoptionsArray = javaScriptVar.res[i].Options[0];
                 document.getElementById('questionsForm').innerHTML += `
-                    <div class="btn-group btn-group-toggle" data-toggle="buttons" id = "radiotext`+(i)+`">
+                    <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
                         <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                        <div class="btn-group btn-group-toggle" data-toggle="buttons" id = "radiotext`+(i)+`">
+                        </div>  
                     </div>  
                     `;  
 
                 for(j=0;j<radiobtnoptionsArray.length;j++){
                     // console.log(optionsArray[j]);
                     document.getElementById('radiotext'+(i)).innerHTML += `
-                        <label class="btn btn-primary" for="radiobtn`+j+`"><input style= "display:none;" type="radio" name="radiotext" value="`+radiobtnoptionsArray[j].OptionText+`" id="radiobtn`+radiobtnoptionsArray[j].OptionId+`">`+radiobtnoptionsArray[j].OptionText+`</label>
+                        <label class="btn radiobtn" >
+                            <input type="radio" name="radiotext" value="`+radiobtnoptionsArray[j].OptionText+`" id="radiobtn`+radiobtnoptionsArray[j].OptionId+`">
+                            `+radiobtnoptionsArray[j].OptionText+`
+                        </label>
                     `;        
                 }
 
