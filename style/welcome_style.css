@@ -1,10 +1,88 @@
-#questionsBox{
-    border: red 1px solid;
+
+* {
+    /* border:1px solid red; */
 }
+
+
+/* For splitting whole screen in three sections - START*/
+.parent{
+    display: flex;
+    height:100vh;
+    margin: 0 auto;
+}
+
+.frm1{
+    position: absolute;
+    top: 20%;
+    height: 200px;
+    margin-top: -50px;
+    width: 100%;
+}
+
+.left-child{
+    flex: 0.3;
+    position: relative;
+}
+
+.left-child img{
+    position: absolute;
+    top: 50%;
+    margin-top: -50px;
+    cursor: pointer;
+}
+
+.right-child{
+    flex: 0.3;
+    position: relative;
+}
+
+.right-child img{
+    position: absolute;
+    top: 50%;
+    margin-top: -50px;
+    cursor: pointer;
+}
+
+.child{
+    flex: 2;
+    height:100%;
+    position: relative;
+}
+
+/* For splitting whole screen in three sections - END*/
+
 
 #questionsForm{
     margin-top: 5%;
     margin-bottom: 5%;
+}
+
+.radiobtn{
+    background-color: rgba(255, 255, 255, 0.127);
+    backdrop-filter: blur(30px) brightness(115%);
+    color:rgba(255, 255, 255, 0.247);
+    font-size: 1.5em;  
+    height: 150px;
+    align-items: center;
+    width: 350px;
+    margin-right: 2.5%;
+    vertical-align: middle;
+    margin-left:2.5%;
+    margin-top: 2%;
+    border-radius: 15px;
+}
+
+.radiobtn:hover{
+    color:rgb(255, 255, 255);
+    border:1px solid rgb(255, 255, 255);
+}
+
+.MainTitle{
+    font-size: 2em;
+}
+
+.Text{
+    font-size: 1.5em;  
 }
 
 /* For NDA modal Popup - START */

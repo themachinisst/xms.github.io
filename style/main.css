@@ -1,4 +1,32 @@
 body{
-    /* font-color: #E5E5E5; */
-    background-color:black;
+
+        color: bisque;
+         background-image: url('../assets/bg.png');
+
+        /* Add image */
+        background-image: url('../assets/bg.png');
+  
+        /* Make image center */
+        background-position: center center;
+  
+        /* Make background color black */
+        background-color: black;
+  
+        /* Not repeat images */
+        background-repeat: no-repeat;
+  
+        /* Set background size auto */
+        background-size: auto;
+  
+      /* Media query for mobile devices  */
+      @media only screen and (max-width: 767px) {
+        body {
+          background-image: url('../assets/bg.png');
+        }
+      }
+
+    background-size: auto; 
+    background-repeat: no-repeat;
+    
+    
 }
