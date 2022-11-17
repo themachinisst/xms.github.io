@@ -64,6 +64,7 @@ if(isset($_POST['responseSubmit'])){
     $responseRes =  json_decode($jsonResponseRes, true)['res'];
     if($responseRes === 'success'){
         // reduirect to thank you page
+        
     }
 
 }
@@ -83,6 +84,7 @@ if(isset($_POST['responseSubmit'])){
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    
     <script type="text/javascript" src="./js/welcome.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <link rel="stylesheet" href="../style/welcome_style.css">
@@ -126,8 +128,8 @@ if($("input[name='RequirementTypes']").prop("checked")){
 <body>
     <div class = "parent">
         <!-- Left direction block - START -->
-        <div class = "left-child" >
-            <img src="../assets/left_arrow.png"/>
+        <div class = "left-child">
+            <img src="../assets/left_arrow.png" class = "left" id = "left"/>
         </div>
         <!-- Left direction block - END -->
 
@@ -145,21 +147,21 @@ if($("input[name='RequirementTypes']").prop("checked")){
                     <div class="btn-group-toggle" data-toggle="buttons">
                         <label class="btn radiobtn">
                             Content
-                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onChange="autoSubmit(frm1);"/>
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onClick="autoSubmit(frm1);"/>
                         </label>
                         
                         <label class="btn radiobtn">
-                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onChange="autoSubmit(frm1);"/>
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onClick="autoSubmit(frm1);"/>
                             Digital
                         </label>
                     
                         <label class="btn radiobtn">
-                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?> value="On Ground" id="RequirementOnGround" onChange="autoSubmit(frm1);"/>
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?> value="On Ground" id="RequirementOnGround" onClick="autoSubmit(frm1);"/>
                             On Ground
                         </label>
                         
                         <label class="btn radiobtn">
-                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?> value="Hybrid" id="RequirementHybrid" onChange="autoSubmit(frm1);"/>
+                            <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?> value="Hybrid" id="RequirementHybrid" onClick="autoSubmit(frm1);"/>
                             Hybrid
                         </label>
                         
@@ -175,16 +177,16 @@ if($("input[name='RequirementTypes']").prop("checked")){
             </form>
             <!-- Questions Type  -->
 
-            <!-- <p>
+            <p>
                 <a href="reset-password.php" class="btn btn-warning">Reset Password</a>
                 <a href="logout.php" class="btn btn-danger ml-3">Sign Out</a>
-            </p> -->
+            </p>
         </div>
         <!-- Centre Block - END-->
 
         <!-- Right direction block - START-->
         <div class = "right-child">
-            <img src="../assets/right_arrow.png"/>
+            <img src="../assets/right_arrow.png" class = "right" id = "right"/>
         </div>
         <!-- Right direction block - END -->
     </div>
@@ -219,19 +221,18 @@ if($("input[name='RequirementTypes']").prop("checked")){
     let RequirementDigital = document.getElementById('RequirementDigital');
     let RequirementOnGround = document.getElementById('RequirementOnGround');
     let RequirementHybrid = document.getElementById('RequirementHybrid');
-
-
+    
     if(RequirementContent.checked || RequirementDigital.checked || RequirementOnGround.checked || RequirementHybrid.checked){
         let javaScriptVar = <?php echo $jsonResponse; ?>;
         
         //  page counter 
         let counter = 0
+        //  total page variable 
+        let totalPages = 0
 
+        const questionId = [];
         // hide requirement radio buttons 
         document.getElementById("frm1").style.display  = "none";
-
-        // add onclick function navigation functions 
-        document.getElementById("frm1")
 
 
         for(var i=0; i<javaScriptVar.res.length; i++){
@@ -242,6 +243,7 @@ if($("input[name='RequirementTypes']").prop("checked")){
                         <input type = "text" name = "response`+(i)+`"  id= "response`+(i)+`" required/>
                     </div>
                 `;
+                totalPages +=1; 
             }else if(javaScriptVar.res[i].ResponseType === "dropdown"){
                 //
                 document.getElementById('questionsForm').innerHTML += `
@@ -252,7 +254,7 @@ if($("input[name='RequirementTypes']").prop("checked")){
                         </select>
                     </div>
                 `;
-
+                totalPages +=1;
                 // console.log(javaScriptVar.res[i].Options[0]);
                 // For dropdown options - START 
                 let dropdownoptionsArray = javaScriptVar.res[i].Options[0];
@@ -275,6 +277,7 @@ if($("input[name='RequirementTypes']").prop("checked")){
                     </div>  
                     `;  
 
+                    totalPages +=1;
                 for(j=0;j<radiobtnoptionsArray.length;j++){
                     // console.log(optionsArray[j]);
                     document.getElementById('radiotext'+(i)).innerHTML += `
@@ -292,11 +295,14 @@ if($("input[name='RequirementTypes']").prop("checked")){
                         <input type = "file" name = "response`+(i)+`" id= "file" />
                     </div>
                 `;
+                totalPages +=1;
             }
+            
+            questionId.push(javaScriptVar.res[i].QuestionId);
         }
 
-
         document.getElementById('questionsForm').innerHTML +=`
+        <div Id="questionSubmit">
             <div class="form-group">
                 <input type = "checkbox"  name="terms" value="1" required> 
                 I Agree  
@@ -306,8 +312,62 @@ if($("input[name='RequirementTypes']").prop("checked")){
                 <span class="invalid-feedback"></span>
             </div>  
             <input type="submit" class="btn btn-primary" name = "responseSubmit" id = "responseSubmit" value="Submit">
+        </div>
         `;
-    
+        
+        showFirstReq(javaScriptVar, 1);
+        
+        //Set counter as 1 for the default page one
+        counter = 0;
+        console.log(totalPages)
+        // Navigating pages block - start
+        document.getElementById('left').addEventListener('click', function(e) {
+            console.log('counter left : '+counter);
+            
+            if(counter<=javaScriptVar.res.length && counter>0){
+                document.getElementById('left').style.display = "block";
+                document.getElementById('right').style.display = "block";
+                counter-=1;
+                if(counter<0){
+                    showFirstReq(jsArr);
+                    document.getElementById('left').style.display = "none";
+                }
+                navigatePage(questionId, counter);
+            }else if(counter === 0){
+                showFirstReq(javaScriptVar, 0);
+                document.getElementById("frm1").style.display  = "block";
+                document.getElementById('left').style.display = "none";
+            }else if(counter<0){
+                console.log("Can't move left");
+            }
+            console.log(counter);
+        });
+        
+        document.getElementById('right').addEventListener('click', function(e) {
+            console.log('counter right : '+counter);
+            if(counter<javaScriptVar.res.length){
+                document.getElementById("frm1").style.display  = "none";
+                document.getElementById('left').style.display = "block";
+                document.getElementById('right').style.display = "block";
+                counter+=1;
+                if(counter>=javaScriptVar.res.length){
+                   
+                    document.getElementById('right').style.display = "none";
+                    document.getElementById('questionSubmit').style.display = "block";
+                }
+                navigatePage(questionId, counter);
+            }else if(counter === 0){
+                console.log("IN");
+                showFirstReq(javaScriptVar, 1);
+            }else{
+                console.log("Can't move right");
+            }
+            // console.log(counter);
+        });
+        // Navigating pages block - end
+
+
+
         // For modal popup - START
         // Select modal
         var mpopup = document.getElementById('mpopupBox');
