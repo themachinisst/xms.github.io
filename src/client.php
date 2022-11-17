@@ -35,6 +35,7 @@ if (isset($_POST['Organization'])) {
     // print_r($postDatatype);
     $jsonResponsetype = rest_call('POST', $urltype, $postDatatype, $responsetype, 'multipart/form-data', "Bearer " . $_COOKIE['kpmg-access']);
     $responsetype = json_decode($jsonResponsetype, true);
+    header("location: welcome.php");
     //echo $Id;
 
     // print_r($jsonResponsetype);
@@ -82,7 +83,7 @@ if (isset($_POST['Organization'])) {
         <div class="child">
 
             <!-- Requirement Type  -->
-            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" name="form2" id="form2">
+            <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" name="form2" id="form2">
 
                 <!-- ratio button and top text -->
                 <div class="form-group" id='hide'>
