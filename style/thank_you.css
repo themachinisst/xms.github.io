@@ -1,0 +1,127 @@
+/* .conatainer1 img.logo-img {
+    position: absolute;
+    width: 109px;
+    height: 103px;
+    left: 33px;
+    top: 25px;
+} */
+
+.conatainer1 img.icon-img {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    left: 1200px;
+    top: 40px;
+}
+
+.conatainer2 p.left-text {
+    position: absolute;
+    /* width: 221px;
+    height: 38px; */
+    left: 125px;
+    top: 210px;
+    font-weight: 650;
+    font-size: 32px;
+    line-height: 38px;
+    letter-spacing: 0.01em;
+    color: #FFFFFF;
+}
+
+.conatainer2 p.right-text {
+    position: absolute;
+    /* width: 235px;
+    height: 38px; */
+    left: 1005px;
+    top: 210px;
+    font-weight: 650;
+    font-size: 30.5px;
+    line-height: 38px;
+    letter-spacing: 0.01em;
+    color: #FFFFFF;
+}
+
+.conatainer3 img.top-line {
+    position: absolute;
+    /* width: 1200px; */
+    /* height: 2px; */
+    left: 125px;
+    right: 82px;
+    top: 295px;
+}
+
+.conatainer3 img.bottom-line {
+    position: absolute;
+    /* width: 1200px; */
+    /* height: 2px; */
+    left: 125px;
+    right: 82px;
+    top: 645px;
+}
+
+.conatainer3 p.thankyou-text {
+    position: absolute;
+    /* width: 250px;
+    height: 45px; */
+    left: 125px;
+    top: 345px;
+    font-style: normal;
+    font-weight: 650;
+    font-size: 39px;
+    line-height: 38px;
+    letter-spacing: 0.01em;
+    background: -webkit-linear-gradient(21deg, #9300D8 5%, #FF4789 53%, #FFB800 91%);
+    -webkit-background-clip: text;
+    -webkit-text-stroke: 4px transparent;
+    color: black;
+
+    /* color: #FFFFFF; */
+    /* background: linear-gradient(to right, #f32170,
+                    #ff6b08, #cf23cf, #eedd44);
+            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; */
+}
+
+
+.conatainer3 p.bold-text {
+    position: absolute;
+    /* width: 705px;
+    height: 34px; */
+    left: 125px;
+    top: 395px;
+    font: bold;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 25px;
+    line-height: 34px;
+    letter-spacing: 0.01em;
+    color: #FFFFFF;
+}
+
+.conatainer3 p.normal-text {
+    position: absolute;
+    /* width: 673px;
+    height: 58px; */
+    width: 400px; 
+    word-wrap: normal;
+    left: 125px;
+    top: 435px;
+    /* font-style: normal; */
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 29px;
+    letter-spacing: 0.01em;
+    color: #AAAAAA;
+}
+
+.conatainer3 p.bottom-text {
+    position: absolute;
+    /* width: 286px;
+    height: 29px; */
+    left: 560px;
+    top: 550px;
+    font-weight: 500;
+    font-size: 19px;
+    line-height: 29px;
+    letter-spacing: 0.01em;
+    color: #FFFFFF;
+}
