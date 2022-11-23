@@ -1,0 +1,22 @@
+body{
+
+    color: white;
+     background-image: url('../assets/Maskgrup.png');
+     background-attachment: fixed;
+
+    /* Make background color black */
+    background-color: black;
+    /* background-size: cover; */
+    background-size: 100%;
+    /* background-size: cover; */
+    background-repeat: no-repeat;
+
+  /* Media query for mobile devices  */
+  @media only screen and (max-width: 767px) {
+    body {
+    }
+  }
+
+
+
+}
