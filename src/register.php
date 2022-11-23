@@ -9,8 +9,8 @@ $password_err = $confirm_password_err = "";
 
 
 //additional varibales 
-$name = $organization = $city = $subagency =  $email = $phone = $terms = $radio = $salescode = "";
-$name_err = $organization_err = $city_err = $subagency_err =  $email_err =  $phone_err = $terms_err = $radio_err  = $salescode_err ="";
+$name = $lastname = $organization = $city = $subagency =  $email = $phone = $terms = $radio = $salescode = "";
+$name_err = $LastName_err = $organization_err = $city_err = $subagency_err =  $email_err =  $phone_err = $terms_err = $radio_err  = $salescode_err ="";
 
 
 
@@ -73,68 +73,98 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     //For user's name -----------END--------------------
 
     //For radio button to be selected ----------START-------------------
-    if(!(isset($_POST["ClientType"]))){
-        $radio_err = "Please select one of the options.";
-    }else{
-        $radio = $_POST["ClientType"];
-    }
+    // if(!(isset($_POST["ClientType"]))){
+    //     $radio_err = "Please select one of the options.";
+    // }else{
+    //     $radio = $_POST["ClientType"];
+    // }
 
     //For radio button to be selected -----------END--------------------
 
     //For user's organization ----------START-------------------
         
     // if((empty($_POST["Organization"])) && $radio == 'Client'){
-    if(empty(trim($_POST["Organization"])) && isset($_POST["ClientType"]) && $radio == "Client"){
-        $organization_err = "Please enter a valid organization name.";
-        // $organization_err = $radio ;
-    }else{
-        //Prepare a select statement
-        $sql = "SELECT Id from login WHERE Organization = ?";
+    // if(empty(trim($_POST["Organization"])) && isset($_POST["ClientType"]) && $radio == "Client"){
+    //     $organization_err = "Please enter a valid organization name.";
+    //     // $organization_err = $radio ;
+    // }else{
+    //     //Prepare a select statement
+    //     $sql = "SELECT Id from login WHERE Organization = ?";
 
-        // $mysqli->prepare function is used to prepare an SQL statement for execution.
-        if($stmt = $mysqli->prepare($sql)){
-            //bind variabes to the prepared statement as parameters
-            $stmt->bind_param("s",  $param_organization);
+    //     // $mysqli->prepare function is used to prepare an SQL statement for execution.
+    //     if($stmt = $mysqli->prepare($sql)){
+    //         //bind variabes to the prepared statement as parameters
+    //         $stmt->bind_param("s",  $param_organization);
 
-            //set parameters
-            $param_organization = trim($_POST["Organization"]);
+    //         //set parameters
+    //         $param_organization = trim($_POST["Organization"]);
 
-            //attempt to execute the prepared statement 
-            if($stmt->execute()){
+    //         //attempt to execute the prepared statement 
+    //         if($stmt->execute()){
                 
-                //store results
-                $stmt->store_result();
-                $organization = trim($_POST["Organization"]);
-            }else{
-                echo "OOPs! Something went wrong. Please try again !";
-            }
-            //close statement
-            $stmt->close();
-        }
-    }
+    //             //store results
+    //             $stmt->store_result();
+    //             $organization = trim($_POST["Organization"]);
+    //         }else{
+    //             echo "OOPs! Something went wrong. Please try again !";
+    //         }
+    //         //close statement
+    //         $stmt->close();
+    //     }
+    // }
 
     //For user's organization -----------END--------------------
 
     //For user's subagency ----------START-------------------
         
-    if((trim($_POST["SubAgency"]))){
+    // if((trim($_POST["SubAgency"]))){
+    //     //Prepare a select statement
+    //     $sql = "SELECT Id from login WHERE SubAgency = ?";
+
+    //     // $mysqli->prepare function is used to prepare an SQL statement for execution.
+    //     if($stmt = $mysqli->prepare($sql)){
+    //         //bind variabes to the prepared statement as parameters
+    //         $stmt->bind_param("s",  $param_subagency);
+
+    //         //set parameters
+    //         $param_subagency = trim($_POST["SubAgency"]);
+
+    //         //attempt to execute the prepared statement 
+    //         if($stmt->execute()){
+                
+    //             //store results
+    //             $stmt->store_result();
+    //             $subagency = trim($_POST["SubAgency"]);
+    //         }else{
+    //             echo "OOPs! Something went wrong. Please try again !";
+    //         }
+    //         //close statement
+    //         $stmt->close();
+    //     }
+    // }
+    //For user's subagency -----------END--------------------
+
+    //For user's LastName -----------START--------------------
+    if(empty(trim($_POST["LastName"]))){
+        $lastname_err = "Please enter a valid Last Name.";
+    }else{
         //Prepare a select statement
-        $sql = "SELECT Id from login WHERE SubAgency = ?";
+        $sql = "SELECT Id from login WHERE LastName = ?";
 
         // $mysqli->prepare function is used to prepare an SQL statement for execution.
         if($stmt = $mysqli->prepare($sql)){
             //bind variabes to the prepared statement as parameters
-            $stmt->bind_param("s",  $param_subagency);
+            $stmt->bind_param("s",  $param_lastname);
 
             //set parameters
-            $param_subagency = trim($_POST["SubAgency"]);
+            $lastname = trim($_POST["LastName"]);
 
             //attempt to execute the prepared statement 
             if($stmt->execute()){
                 
                 //store results
                 $stmt->store_result();
-                $subagency = trim($_POST["SubAgency"]);
+                $lastname = trim($_POST["LastName"]);
             }else{
                 echo "OOPs! Something went wrong. Please try again !";
             }
@@ -142,8 +172,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $stmt->close();
         }
     }
-
-    //For user's subagency -----------END--------------------
+//For user's LastName -----------END--------------------
+    
 
     //For Sales Code  ----------START-------------------
     if(empty(trim($_POST["SalesCode"]))){
@@ -224,6 +254,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     //validate name
     if(empty(trim($_POST["Phone"]))){
         $phone_err = "Please enter a valid phone number.";
+    }else if(strlen((string)trim($_POST["Phone"])) > 10 || strlen((string)trim($_POST["Phone"])) < 10){
+        $phone_err = "Please enter a valid phone number.";
     }else{
         //Prepare a select statement
         $sql = "SELECT Id from login WHERE Phone = ?";
@@ -260,17 +292,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 
     //Check input errors before inserting in data base  salescode_err
-    if(empty($password_err) && empty($confirm_password_err) && empty($name_err) && empty($radio_err) && empty($salescode_err) && empty($organization_err) && empty($email_err) && empty($phone_err)){
+    if(empty($password_err) && empty($confirm_password_err) && empty($name_err) && empty($lastname_err) && empty($radio_err) && empty($salescode_err) && empty($organization_err) && empty($email_err) && empty($phone_err)){
             
         // Prepare an insert statement
-        $sql = "INSERT INTO login (Password, Name, Organization, SubAgency, Email, SalesCode, Phone) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO login (Password, Name, LastName, Organization, SubAgency, Email, SalesCode, Phone) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         if($stmt = $mysqli->prepare($sql)){
             //Bind variables to the prepared statement as parameters
-            $stmt->bind_param("ssssssi", $param_password, $param_name, $param_organization, $param_subagency, $param_email, $param_salescode, $param_phone);
+            $stmt->bind_param("sssssssi", $param_password, $param_name, $param_lastname, $param_organization, $param_subagency, $param_email, $param_salescode, $param_phone);
 
             //set parameters 
             $param_name = $name;
+            $param_lastname = $lastname;
             $param_organization = $organization;
             $param_subagency = $subagency;
             $param_email = $email;
@@ -287,7 +320,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 //Redirect to login page
                 header("location: login.php");
             }else{
-                echo "OOPs! Something went wrong. Please try again later !";
+                echo "OOPs! Something went wrong. Please try again later !".mysqli_error($mysqli).$phone;
             }
 
             //close statement
@@ -307,20 +340,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <meta charset="UTF-8">
     <title>Sign Up</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../style/main.css">
+    <link rel="stylesheet" href="../style/first2style.css">
     <link rel="stylesheet" href="../style/register_style.css">
     <script type="text/javascript" src="./js/register.js"></script>
-    <style>
+    <!-- <style>
         body{ font: 14px sans-serif; }
         .wrapper{ width: 360px; padding: 20px; }
 
         .wrapper{
-            /* margin-top:3%;
-            margin-bottom:3%;
-            background-color: grey; */
+            
             border-radius: 4px;
         }
-    </style>
+    </style> -->
 </head>
 <script>
     function showState(state)
@@ -343,46 +374,29 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     };
 </script>
 <body>
-<div class="split left">
-  <!-- <div class="centered">
-    <img src="../assets/registerBG.png" alt="registerBG" class = "registerBG">
-    <h2>Jane Flex</h2>
-    <p>Some text.</p>
-  </div> -->
-  <!-- <img src="../assets/registerBG.png" class = "registerBG" alt="registerBG"> -->
-</div>
-
-
-<div class = "split right">
-    <div class="wrapper">
-        <h2>Let's Make it happen Together</h2>
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm" id="frm" class = "frm">
-            <div class="form-group">
-                <label>Name <span style="color:red;">*</span></label>
-                <input type="text" name="Name" onkeyup="validateText(this);" class="form-control <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $name; ?>" required>
-                <span class="invalid-feedback"><?php echo $name_err; ?></span>
-            </div>  
+<div class = "main-div">
+    <div class="parent-div">
+    <div>
+                <center>
+                    <h1>Let's Make it happen Together</h1>
+                    <h5>Lorem Ipsum is simply dummy text of the printing and typesetting 
+                        industry. Lorem Ipsum has been the industry</h5>
+                </center>
         
-            <div class="form-group">
-                <label>Phone <span style="color:red;">*</span></label>
-                <input type="number" maxlength="10" name="Phone" onkeyup="validateText(this);" class="form-control <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $phone; ?>" required>
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm" id="frm" class = "frm">
+            <div class="form">
+                
+                <input type="text" name="Name" onkeyup="validateText(this);" class="ip1 <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $name; ?>" placeholder="First Name" required>
+                <span class="invalid-feedback"><?php echo $name_err; ?></span>
+                <input type="text" name="LastName" onkeyup="validateText(this);" class="ip2 <?php echo (!empty($lastname_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $lastname; ?>" placeholder="Last Name" required>
+                <span class="invalid-feedback"><?php echo $LastName_err; ?></span>
+                <input type="tel" maxlength="10" name="Phone" onkeyup="validateText(this);" class="ip3" <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $phone; ?>" placeholder="Mobile Number" required>
                 <span class="invalid-feedback"><?php echo $phone_err; ?></span>
-            </div>  
-
-            <div class="form-group">
-                <label>Email ID <span style="color:red;">*</span></label>
-                <input type="email" name="Email" class="form-control <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $email; ?>"required>
+                <input type="email" name="Email" class="ip4 <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $email; ?>" placeholder="Email Address" required>
                 <span class="invalid-feedback"><?php echo $email_err; ?></span>
-            </div>  
-
-            <div class="form-group">
-                <label>Sales Code <span style="color:red;">*</span></label>
-                <input type="text" pattern="[a-zA-Z0-9]+" name="SalesCode" class="form-control <?php echo (!empty($salescode_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $salescode; ?>"required>
-                <span class="invalid-feedback"><?php echo $salescode_err; ?></span>
-            </div>
-
+                
             <!-- Client Type  -->
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <br/>
                 <ul>
                     <li class = "ClientTypes">
@@ -393,11 +407,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     <span class="invalid-feedback"><?php echo $radio_err; ?></span>
                     </li>
                 </ul>
-            </div>
+            </div> -->
             
             <!-- Client Type  -->
 
-            <div class="form-group client">
+            <!-- <div class="form-group client">
                 <label>Organization Name <span style="color:red;">*</span></label>
                     <input type="text" name="Organization" class="form-control <?php echo (!empty($organization_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $organization; ?>">
                     </input>
@@ -410,20 +424,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     </input>
                 <span class="invalid-feedback"><?php echo $subagency_err; ?></span>
             </div>    
-            
+            -->
     
-            <div class="form-group">
-                <label>Password <span style="color:red;">*</span></label>
-                <input type="password" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false"  name="Password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $password; ?>"  required>
+            
+                <input type="password" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false"  name="Password" class="ip5 <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $password; ?>" placeholder="Password" required>
                 <span class="invalid-feedback"><?php echo $password_err; ?></span>
-            </div>
-            <div class="form-group">
-                <label>Confirm Password <span style="color:red;">*</span></label>
-                <input type="password" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $confirm_password; ?>"  required>
+           
+                <input type="password" onCopy="return false" onDrag="return false" onDrop="return false" onPaste="return false" name="confirm_password" class="ip6 <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $confirm_password; ?>" placeholder="Re-enter Password" required>
                 <span class="invalid-feedback"><?php echo $confirm_password_err; ?></span>
+
+                <input type="text" pattern="[a-zA-Z0-9]+" name="SalesCode" class="ip7 <?php echo (!empty($salescode_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $salescode; ?>" placeholder="Sales Code" required>
+                <span class="invalid-feedback"><?php echo $salescode_err; ?></span>
+            
             </div>
 
-            <div class="form-group">
+            <div class="chkbx">
                 <input type = "checkbox"  name="terms" value="1" class="<?php echo (!empty($terms_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $$terms; ?>"required> 
                 I Agree to 
                 <a href="javascript:void(0);" class = "TermsConditionsText" id="mpopupLink">
@@ -432,11 +447,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 <span class="invalid-feedback"><?php echo $terms_err; ?></span>
             </div>
 
-            <div class="form-group">
-                <input type="submit" class="btn btn-primary" value="Submit">
-                <input type="reset" class="btn btn-secondary ml-2" value="Reset">
+            <div class="butn">
+                <input type="submit" class="btn btn-secondary ml-2" value="Submit">
+                <!-- <input type="reset" class="btn btn-secondary ml-2" value="Reset"> -->
+                <!-- <div class="nav-bar"></div> -->
             </div>
+            <div class="footer">
             <p>Already have an account? <a href="login.php">Login here</a>.</p>
+            </div>
+            
         </form>
         
     </div>    
@@ -468,41 +487,42 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 </body>
 
 <script>
-// For modal popup - START
-// Select modal
-var mpopup = document.getElementById('mpopupBox');
+    // For modal popup - START
+    // Select modal
+    var mpopup = document.getElementById('mpopupBox');
 
-// Select trigger link
-var mpLink = document.getElementById("mpopupLink");
+    // Select trigger link
+    var mpLink = document.getElementById("mpopupLink");
 
-// Select close action element
-var close = document.getElementsByClassName("close")[0];
+    // Select close action element
+    var close = document.getElementsByClassName("close")[0];
 
 
-// Select close action element
-var goBackBtn = document.getElementById("goBackBtn");
+    // Select close action element
+    var goBackBtn = document.getElementById("goBackBtn");
 
-// Open modal once the link is clicked
-mpLink.onclick = function() {
-    mpopup.style.display = "block";
-};
+    // Open modal once the link is clicked
+    mpLink.onclick = function() {
+        mpopup.style.display = "block";
+    };
 
-// Close modal once close element is clicked
-close.onclick = function() {
-    mpopup.style.display = "none";
-};
-
-// Close modal once goBackBtn button is clicked
-goBackBtn.onclick = function() {
-    mpopup.style.display = "none";
-};
-
-// Close modal when user clicks outside of the modal box
-window.onclick = function(event) {
-    if (event.target == mpopup) {
+    // Close modal once close element is clicked
+    close.onclick = function() {
         mpopup.style.display = "none";
-    }
-};
-// For modal popup - END
+    };
+
+    // Close modal once goBackBtn button is clicked
+    goBackBtn.onclick = function() {
+        mpopup.style.display = "none";
+    };
+
+    // Close modal when user clicks outside of the modal box
+    window.onclick = function(event) {
+        if (event.target == mpopup) {
+            mpopup.style.display = "none";
+        }
+    };
+    // For modal popup - END
 </script>
+
 </html>
