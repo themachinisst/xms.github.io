@@ -13,8 +13,8 @@ if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
 require_once "config.php";
 
 //Define variables and initialize with empty values
-$email = $password = $name = "";
-$email_err = $password_err = $login_err = $name_err ="";
+$email = $password = $name = $salescode = "";
+$email_err = $password_err = $login_err = $name_err = $salescode_err = "";
 
 //Processing from data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -36,7 +36,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     //validate credentirals 
     if(empty($email_err) && empty($password_err)) {
         //Prepare a select statement
-        $sql = "SELECT Id, Email, Name, Password FROM login WHERE Email = ?";
+        $sql = "SELECT Id, Email, Name, Password, SalesCode FROM login WHERE Email = ?";
 
         if($stmt = $mysqli->prepare($sql)){
             //Bind variables to the prepared statment as parameters 
@@ -52,7 +52,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 //check if email exists, if yes then verify the password
                 if($stmt->num_rows==1){
                     //Bind result variables 
-                    $stmt->bind_result($id, $email, $name, $hashed_password);
+                    $stmt->bind_result($id, $email, $name, $hashed_password, $salescode);
 
                     if($stmt->fetch()){
                         if(password_verify($password, $hashed_password)){
@@ -65,9 +65,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                             $_SESSION["id"] = $id;
                             $_SESSION["email"] = $email;
                             $_SESSION["name"] = $name;
+                            $_SESSION["salescode"] = $salescode;
+                            
+                            //To create folder by the Id name
+                            $folderPath = "uploads/".$_SESSION["id"];
+                            if (!file_exists($folderPath)) {
+                                mkdir($folderPath, 0777, true);
+                            }
 
                             //Redirect user to welcome page
-                            header("location: welcome.php");
+                            // header("location: welcome.php");
+                            header("location: client.php");
                         }else{
                             //Password is not valid, display a generic error message
                             $login_err = "Invalid email or password.";
@@ -96,15 +104,29 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     <meta charset="UTF-8">
     <title>Login</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../style/first2style.css">
+    <link rel="stylesheet" href="../style/login_style.css">
     <style>
         body{ font: 14px sans-serif; }
         .wrapper{ width: 360px; padding: 20px; }
+
+        .wrapper{
+            /* margin-top:3%;
+            margin-bottom:3%;
+            background-color: grey; */
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
-    <div class="wrapper">
-        <h2>Let's Make it happen <br/>Together</h2>
-        <p>Please fill in your credentials to login.</p>
+<div class = "main-div">
+<div class="parent-div">
+            <div>
+                <center>
+                    <h1>Let’s make it happen together</h1>
+                    <h5>Lorem Ipsum is simply dummy text of the printing and typesetting
+                         industry. Lorem Ipsum has been the industry.</h5>
+                </center>
 
         <?php 
         if(!empty($login_err)){
@@ -113,21 +135,30 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         ?>
 
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <div class="form-group">
-                <label>Email</label>
-                <input type="text" name="Email" class="form-control <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $email; ?>" required>
+            <div class="form">
+                <!-- <label>Email</label> -->
+                <input type="text" placeholder = "Email Address" name="Email" class="ip1 <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $email; ?>" required>
                 <span class="invalid-feedback"><?php echo $email_err; ?></span>
             </div>    
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" name="Password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" required>
+            <div class="form">
+                <!-- <label>Password</label> -->
+                <input type="password" placeholder = "Password" name="Password" class="ip2 <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" required>
                 <span class="invalid-feedback"><?php echo $password_err; ?></span>
             </div>
-            <div class="form-group">
-                <input type="submit" class="btn btn-primary" value="Login">
+            <div class="fgpssowrd">
+            <a href="reset-password.php">Forget Password?</a>
             </div>
+            <div class="butn">
+                <input type="submit" class="btn btn-secondary ml-2" value="Login">
+                <!-- <div class="nav-bar"></div> -->
+            </div>
+            <div class="footer">
             <p>Don't have an account? <a href="register.php">Sign up now</a>.</p>
+            </div>
+            
+            </div>
         </form>
     </div>
+</div>    
 </body>
 </html>
