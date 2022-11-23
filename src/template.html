@@ -3,31 +3,30 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="https://unpkg.com/gutenberg-css@0.6">
-    <style>
-        /* table {
-            width: 100%;
+     <style>
+         * body{
+        margin: 0px;
+        padding: 0px;   
+        background-color: white;
+        
         }
-        footer {
-            text-align: center;
-            font-style: italic;
-        } */
-       
+        
         table {
          font-family: arial, sans-serif;
          border-collapse: collapse;
          width: 100%; 
+         color: black;
         }
 
         td, th {
          /* background-color: #dddddd; */
-         border: 1px solid #dddddd;
+         border: 1px solid black;
          text-align: left;
          padding: 8px;
         }
 
         tr:nth-child(even) {
-         border: 1px solid #dddddd;
+         border: 1px solid black;
          /* background-color: #dddddd; */
         }
 
@@ -35,25 +34,46 @@
          font-family: arial, sans-serif;
          border-collapse: collapse;
          width: 100%;  
+         color: black;
         }
         h4{
          font-family: arial, sans-serif;
          text-align: center;
+         color: black;
         }
         h1{
          font-family: arial, sans-serif; 
+         text-align: center;
+         color: black;
+        }
+      
+        .h4{
+         font-family: arial, sans-serif; 
+         text-align: center;
+         color: black;
+            
+        }
+        img{
+            align-items: center;  
+        }
+        span{
+            text-decoration: underline;     
+            text-decoration-color: black;
         }
         
         
     </style>
 </head>
-<body>
+<body >
+    <div class="form-group">
+    <!-- <img src=""> -->
     
-    <!-- <img src="../assets/logo.png"> -->
-    <img src="../assets/logo.png">
+    <!-- <img src="../assets/logo.png" alt=""> -->
+
+    <!-- <img src = {{ $html }}> -->
+    <h1>Client Information</h1>
     
-    <h1>Document</h1>
-    
+    <h4><span>Basic Information</span></h4>
     
     <p>Name: {{ Name }}</p>
     <p>Email: {{ Email }}</p>
@@ -61,27 +81,22 @@
     <p>Phone: {{ Phone }}</p>
     <p>Organization: {{ Organization }}</p>
     <p>SubAgency: {{ SubAgency }}</p>
+    <p>Requirement: {{ Requirement }}</p>
     
     
+    <h4><span>Project Information</span></h4>
     <table >
         <thead>
             <tr>
                 <th>Question</th>
                 <th>Answer</th>
-                <th>Requirement</th>
+                <!-- <th>Requirement</th> -->
             </tr>
         </thead>
         <tbody>
             <tr>
 			{{ Table }}
-			<!--
-                <td style="text-align: left">{{ Question }}</td>
-                <td style="text-align: middle">{{ Response }}</td>
-                <td style="text-align: right">{{ Requirement }}</td>
-                
-                <td>{{ Question }}</td>
-                <td>{{ Response }}</td>
-                <td>{{ Requirement }}</td> -->
+			
             </tr>
             
         </tbody>
@@ -91,6 +106,6 @@
     <footer>
         <h4>Thank You</h4>
     </footer>
-    
+</div>
 </body>
 </html>
