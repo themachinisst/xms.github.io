@@ -33,7 +33,7 @@ if (isset($_POST['Organization'])) {
 
     $postDatatype = array("Id" => $Id, "Organization" => $Organization, "OrganizationName" => $OrganizationName, "SubAgency" => $SubAgency, "BrandName" => $BrandName);
     // print_r($postDatatype);
-    $jsonResponsetype = rest_call('POST', $urltype, $postDatatype, $responsetype, 'multipart/form-data', "Bearer " . $_COOKIE['kpmg-access']);
+    $jsonResponsetype = rest_call('POST', $urltype, $postDatatype, $responsetype, 'multipart/form-data', "Bearer " . $_COOKIE['xms-access']);
     $responsetype = json_decode($jsonResponsetype, true);
     header("location: welcome.php");
     //echo $Id;
@@ -64,6 +64,9 @@ if (isset($_POST['Organization'])) {
     <link rel="stylesheet" href="../style/client_style.css">
     <link rel="stylesheet" href="../style/main.css">
     <style>
+        /* *{
+             border: 1px solid red; 
+        }  */
         body {
             font: 14px sans-serif;
             text-align: center;
@@ -81,15 +84,17 @@ if (isset($_POST['Organization'])) {
         </div>
         <!-- Centre Block - START-->
         <div class="child">
-
+        <!-- <div class="logout">
+            <a href="logout.php">Logout</a>
+            </div> -->
             <!-- Requirement Type  -->
             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>" method="post" name="form2" id="form2">
 
                 <!-- ratio button and top text -->
                 <div class="form-group" id='hide'>
-                    <br />
-                    <br />
-                    <p class="Text">Hey! who are you ?</p>
+                    
+                    
+                    <p class="Text">Hey! <br> Who are you ?</p>
                     <br />
                     <div class="btn-group-toggle" id="radioid" data-toggle="buttons">
                         <label class="btn radiobtn">
