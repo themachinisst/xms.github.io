@@ -6,10 +6,12 @@ require __DIR__ . "/vendor/autoload.php";
 $files = glob("./pdf/include/*.php");
 foreach($files as $file) include_once($file);
 
+//$html = '<img src = __DIR__ . ../assets/lion.jpg>';
 
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
+// $html='<img src="../assets/logo.png">';
 
 $json=file_get_contents('php://input');
 //$Id = json_decode($json,true)['Id'];
@@ -29,6 +31,7 @@ $var='';
 if(isset($_POST['Id']) && !empty($_POST['Id'])){
    $sql_userDetails = 'SELECT  Name, Email, SalesCode, Phone, Organization, SubAgency FROM login WHERE Id = ?';
    $sql_userResponse = 'SELECT mq.Question, rs.Response, mq.Requirement FROM responses as rs JOIN masterquestions as mq on mq.QuestionId = rs.QuestionId WHERE rs.Id = ?';
+//    $sql_userResponse = 'SELECT mq.Question, rs.Response FROM responses as rs JOIN masterquestions as mq on mq.QuestionId = rs.QuestionId WHERE rs.Id = ?';
    
    
     if($stmt = $mysqli->prepare($sql_userDetails)){
@@ -71,11 +74,13 @@ if(isset($_POST['Id']) && !empty($_POST['Id'])){
         //store results
         $stmt->store_result();
         $stmt -> bind_result($Question, $Response, $Requirement);
+        // $stmt -> bind_result($Question, $Response);
         $resArr = array();
                 
             if($stmt -> num_rows()>0){
                 while($stmt -> fetch()){
                         
+                    // $temp = array("Question"=>$Question, "Response"=>$Response);
                     $temp = array("Question"=>$Question, "Response"=>$Response, "Requirement"=>$Requirement);
                     array_push($resArr, $temp);
                 }
@@ -105,11 +110,11 @@ if(isset($_POST['Id']) && !empty($_POST['Id'])){
      * Set the Dompdf options
      */
 
-    $options = new Options;
-    //$options->setChroot(__DIR__);
-    //$options->setIsRemoteEnabled(true);
-
-    $dompdf = new Dompdf($options);
+    // $options = new Options;
+  
+    $dompdf = new Dompdf(
+        ["chroot"=>__DIR__]
+    );
     /**
      * Set the paper size and orientation
      */
@@ -119,27 +124,29 @@ if(isset($_POST['Id']) && !empty($_POST['Id'])){
      */
     $html = file_get_contents("../template.html");
 
-    $html = str_replace(["{{ Name }}", "{{ Email }}", "{{ SalesCode }}", "{{ Phone }}", "{{ Organization }}", "{{ SubAgency }}"], [$Name, $Email, $SalesCode, $Phone, $Organization, $SubAgency], $html);
+    // $html = str_replace(["{{ Name }}", "{{ Email }}", "{{ SalesCode }}", "{{ Phone }}", "{{ Organization }}", "{{ SubAgency }}"], [$Name, $Email, $SalesCode, $Phone, $Organization, $SubAgency], $html);
+    $html = str_replace(["{{ Name }}", "{{ Email }}", "{{ SalesCode }}", "{{ Phone }}", "{{ Organization }}", "{{ SubAgency }}", "{{ Requirement }}"], [$Name, $Email, $SalesCode, $Phone, $Organization, $SubAgency,$Requirement], $html);
 
         $table="";
         for($i=0;$i<count($resArr);$i++){
         //print_r($resArr);
         $table=$table.'<tr><td style="text-align: left">'.$resArr[$i]["Question"].'</td>';
         $table=$table.'<td style="text-align: middle">'.$resArr[$i]["Response"].'</td>';
-        $table=$table.'<td style="text-align: right">'.$resArr[$i]["Requirement"].'</td></tr>';
+        // $table=$table.'<td style="text-align: right">'.$resArr[$i]["Requirement"].'</td></tr>';
+        
         }
             
         
         $html = str_replace(["{{ Table }}"], [$table], $html);
 
      
-
+      
     
 
-    // // /**
-    // //  * Create the PDF and set attributes
-    // //  */
-    //$dompdf->render();
+    // /**
+    //  * Create the PDF and set attributes
+    //  */
+    // $dompdf->render();
 
     
         
@@ -147,13 +154,15 @@ if(isset($_POST['Id']) && !empty($_POST['Id'])){
         // $path = "http://localhost/xms/src";
         //$dompdf->load_html($aData[$html]);
         $dompdf->load_html($html);
+
        // $dompdf->set_option('isRemoteEnabled',TRUE);
 
         $dompdf->render();
         //print the pdf file to the screen for saving
         //$dompdf->stream("pdf_filename_".$Name.".pdf", array("Attachment" => false));
      //save the pdf file
-       file_put_contents($Id."_".$Name.".pdf", $dompdf->output()); 
+     $output = $dompdf->output();
+       file_put_contents($Id."_".$Name.".pdf", $dompdf->output());
         // $output = $dompdf->output();
         // file_put_contents('file.pdf', $output);
     // /**
@@ -175,16 +184,18 @@ if(isset($_POST['Id']) && !empty($_POST['Id'])){
     //     echo 'invaild';
     
     //  }
-     $pdfpath="http://localhost/xms/src/api/".$Id."_".$Name.".pdf";
+   
+      $pdfpath="http://localhost/xms/src/api/$Id-$Name.pdf";
     
     response($pdfpath); 
     }else{
-        // echo $userArrayResponse;
+        echo $userArrayResponse;
         if($userArrayResponse == false) 
-            $var = "";
+            $var1 = "user not exist";
         if($resArrayResponse == false)
-            $var = "";
-        response($var);
+            $var2 = "no response";
+        response($var1);
+        response($var2);
     }
 }else{
     response("Invalid parameters for pdf");
