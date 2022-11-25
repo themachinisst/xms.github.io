@@ -31,6 +31,7 @@ if(isset($_POST['RequirementTypes'])){
     $_SESSION["questions"] = $response['res'];
 }
 
+
 if(isset($_POST['responseSubmit'])){
 
     $tempRes = array();
@@ -41,15 +42,17 @@ if(isset($_POST['responseSubmit'])){
      
     $urlRes = $basepath.'api/getresponse.php';
     for($i=0;$i<$number_question;$i++){
-
-        // for file upload 
-        if($question[$i]['ResponseType'] === "file" && empty($_POST['response'.$i])){
+        
+        if(($question[$i]['ResponseType'] === "file" || $question[$i]['ResponseType'] === "textarea") && empty($_POST['response'.$i])){
+            // for file upload ignore when no file uploaded
             continue;
         }else if($question[$i]['ResponseType'] === "file" && isset($_POST['response'.$i]) && !empty($_POST['response'.$i])){
+            // 
             $formRespones = $basepath.$Id.'/'.$_POST['response'.$i];
-        }else if($question[$i]['ResponseType'] === "radiobutton" && isset($_POST['response'.$i])){
-            echo "in";
-            print_r($_POST['response'.$i]);
+        }else if($question[$i]['ResponseType'] === "radiobutton" && isset($_POST['response'.$i]) && !empty($_POST['response'.$i])){
+            // echo "in";
+            // print_r($_POST['response'.$i]);
+            $formRespones = $_POST['response'.$i];
         }else{
             $formRespones = $_POST['response'.$i];
         }
@@ -59,10 +62,34 @@ if(isset($_POST['responseSubmit'])){
     }
     
     $postDataRes = json_encode(array("Id"=>$Id, "responses"=>$temp1));
-    // print_r($postDataRes);
+    print_r($postDataRes);
     $jsonResponseRes = rest_call('POST',$urlRes, $postDataRes,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
     $responseRes =  json_decode($jsonResponseRes, true)['res'];
     if($responseRes === 'success'){
+
+        //call generate pdf api
+        
+        $urlGenpdf = $basepath.'api/generatepdf.php';
+        $postDataGenpdf = array("Id"=>$Id);
+        $jsonResponseGenpdf = rest_call('POST',$urlGenpdf, $postDataGenpdf,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+        $responseGenpdf =  json_decode($jsonResponseGenpdf, true)['res'];
+        if(!empty($responseGenpdf)){
+            // send mail api to sales -start
+                // $urlGenpdf = $basepath.'api/generatepdf.php';
+                // $postDataGenpdf = array("Id"=>$Id);
+                // $jsonResponseGenpdf = rest_call('POST',$urlGenpdf, $postDataGenpdf,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+                // $responseGenpdf =  json_decode($jsonResponseGenpdf, true)['res'];
+            // send mail api to sales - end
+
+            // send mail api to client -start
+                // $urlGenpdf = $basepath.'api/generatepdf.php';
+                // $postDataGenpdf = array("Id"=>$Id);
+                // $jsonResponseGenpdf = rest_call('POST',$urlGenpdf, $postDataGenpdf,'multipart/form-data',"Bearer ".$_COOKIE['kpmg-access']);
+                // $responseGenpdf =  json_decode($jsonResponseGenpdf, true)['res'];
+            // send mail api to client - end
+
+        }
+
         // reduirect to thank you page
         
     }
@@ -140,29 +167,29 @@ if($("input[name='RequirementTypes']").prop("checked")){
             <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post"  name="frm1" id="frm1" class = "frm1">
                 <div class="form-group" >
                     <br/>
-                    <p class="MainTitle"><b>Alright !  <b><?php echo htmlspecialchars($_SESSION["name"]); ?></b> let's see what you got</b></p>
+                    <p class="MainTitle"><b>Alright !  <b><?php echo htmlspecialchars($_SESSION["name"]); ?></b>, let's see what you got</b></p>
                     <p class="Text">Select your campaign activation platform</p>
                     <br/>
                     <br/>
                     <div class="btn-group-toggle" data-toggle="buttons">
                         <label class="btn radiobtn">
-                            Content
+                            <p class = "RadioBtnText">Content</p>
                             <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Content') { ?>checked='checked' <?php } ?> value="Content" id="RequirementContent" onClick="autoSubmit(frm1);"/>
                         </label>
                         
                         <label class="btn radiobtn">
                             <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Digital') { ?>checked='checked' <?php } ?> value="Digital" id="RequirementDigital" onClick="autoSubmit(frm1);"/>
-                            Digital
+                            <p class = "RadioBtnText">Digital</p>
                         </label>
                     
                         <label class="btn radiobtn">
                             <input type="radio" name="RequirementTypes"  <?php if ($checked == 'On Ground') { ?>checked='checked' <?php } ?> value="On Ground" id="RequirementOnGround" onClick="autoSubmit(frm1);"/>
-                            On Ground
+                            <p class = "RadioBtnText">On Ground</p>
                         </label>
                         
                         <label class="btn radiobtn">
                             <input type="radio" name="RequirementTypes"  <?php if ($checked == 'Hybrid') { ?>checked='checked' <?php } ?> value="Hybrid" id="RequirementHybrid" onClick="autoSubmit(frm1);"/>
-                            Hybrid
+                            <p class = "RadioBtnText">Hybrid</p>
                         </label>
                         
                     </div>
@@ -234,141 +261,241 @@ if($("input[name='RequirementTypes']").prop("checked")){
         // hide requirement radio buttons 
         document.getElementById("frm1").style.display  = "none";
 
-
-        for(var i=0; i<javaScriptVar.res.length; i++){
-            if(javaScriptVar.res[i].ResponseType === "text"){
-                document.getElementById('questionsForm').innerHTML += `
-                    <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
-                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
-                        <input type = "text" name = "response`+(i)+`"  id= "response`+(i)+`" required/>
-                    </div>
-                `;
-                totalPages +=1; 
-            }else if(javaScriptVar.res[i].ResponseType === "dropdown"){
-                //
-                document.getElementById('questionsForm').innerHTML += `
-                    <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
-                        <p for="'dropdown`+(i)+`">`+(i+1)+`) `+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
-                        <select name = "response`+(i)+`" id= "response`+(i)+`" class="custom-select" style="width:150px;" form = "questionsForm" required>
-                            <option selected disabled value="">Choose one..</option>
-                        </select>
-                    </div>
-                `;
-                totalPages +=1;
-                // console.log(javaScriptVar.res[i].Options[0]);
-                // For dropdown options - START 
-                let dropdownoptionsArray = javaScriptVar.res[i].Options[0];
+        //to add question elements dynamically 
+            for(var i=0; i<javaScriptVar.res.length; i++){
                 
-                for(j=0;j<dropdownoptionsArray.length;j++){
-                    // console.log(optionsArray[j]);
-                    document.getElementById('response'+(i)).innerHTML += `
-                        <option value = "`+dropdownoptionsArray[j].OptionText+`">`+dropdownoptionsArray[j].OptionText+`</option>
-                    `;        
-                }
-                // For dropdown options - END
-            }else if(javaScriptVar.res[i].ResponseType === "radiobutton"){
-                // console.log( javaScriptVar.res[i].Options[0]);
-                let radiobtnoptionsArray = javaScriptVar.res[i].Options[0];
-                document.getElementById('questionsForm').innerHTML += `
-                    <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
-                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
-                        <div class="btn-group btn-group-toggle" data-toggle="buttons" id = "radiotext`+(i)+`">
-                        </div>  
-                    </div>  
-                    `;  
+                    if(javaScriptVar.res[i].ResponseType === "text"){
+                        document.getElementById('questionsForm').innerHTML += `
+                            <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                                <p class="Text">`+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                                <input type = "text" name = "response`+(i)+`"  id= "response`+(i)+`" />
+                            </div>
+                        `;
+                        totalPages +=1; 
+                    }else if(javaScriptVar.res[i].ResponseType === "dropdown"){
+                        //
+                        document.getElementById('questionsForm').innerHTML += `
+                            <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                                <p class="Text" for="'dropdown`+(i)+`">`+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                                <select name = "response`+(i)+`" id= "response`+(i)+`" class="custom-select" style="width:150px;" form = "questionsForm" >
+                                    <option selected disabled value="">Choose one..</option>
+                                </select>
+                            </div>
+                        `;
+                        totalPages +=1;
+                        // console.log(javaScriptVar.res[i].Options[0]);
+                        // For dropdown options - START 
+                        let dropdownoptionsArray = javaScriptVar.res[i].Options[0];
+                        
+                        for(j=0;j<dropdownoptionsArray.length;j++){
+                            // console.log(optionsArray[j]);
+                            document.getElementById('response'+(i)).innerHTML += `
+                                <option value = "`+dropdownoptionsArray[j].OptionText+`">`+dropdownoptionsArray[j].OptionText+`</option>
+                            `;        
+                        }
+                        // For dropdown options - END
+                    }else if(javaScriptVar.res[i].ResponseType === "radiobutton"){
+                        // console.log( javaScriptVar.res[i].Options[0]);
+                        let radiobtnoptionsArray = javaScriptVar.res[i].Options[0];
+                        document.getElementById('questionsForm').innerHTML += `
+                            <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                                <p class="Text">`+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                                <div class="btn-group btn-group-toggle" style = "flex-wrap:wrap;" data-toggle="buttons" id = "radiotext`+(i)+`">
+                                </div>  
+                            </div>  
+                            `;  
 
-                    totalPages +=1;
-                for(j=0;j<radiobtnoptionsArray.length;j++){
-                    // console.log(optionsArray[j]);
-                    document.getElementById('radiotext'+(i)).innerHTML += `
-                        <label class="btn radiobtn" >
-                            <input type="radio" name="radiotext" value="`+radiobtnoptionsArray[j].OptionText+`" id="radiobtn`+radiobtnoptionsArray[j].OptionId+`">
-                            `+radiobtnoptionsArray[j].OptionText+`
-                        </label>
-                    `;        
-                }
+                            totalPages +=1;
+                        for(j=0;j<radiobtnoptionsArray.length;j++){
+                            // console.log(optionsArray[j]);
+                            document.getElementById('radiotext'+(i)).innerHTML += `
+                                <label class="btn radiobtn" style= "border-radius: 15px;margin-left:0">
+                                    <input type="radio"  name="response`+i+`" value="`+radiobtnoptionsArray[j].OptionText+`" id="radiobtn`+radiobtnoptionsArray[j].OptionId+`"  onclick = "DigitalOptionTexts('`+radiobtnoptionsArray[j].OptionText+`', this)">
+                                    <p class = "RadioBtnText">`+radiobtnoptionsArray[j].OptionText+`</p>
+                                </label>
+                            `;        
+                        }
 
-            }else if(javaScriptVar.res[i].ResponseType === "file"){
-                document.getElementById('questionsForm').innerHTML += `
-                    <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
-                        <p>`+(i+1)+`) `+javaScriptVar.res[i].Question+`</p>
-                        <input type = "file" name = "response`+(i)+`" id= "file" />
-                    </div>
-                `;
-                totalPages +=1;
+                    }else if(javaScriptVar.res[i].ResponseType === "file"){
+                        document.getElementById('questionsForm').innerHTML += `
+                            <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                                <p class="Text">`+javaScriptVar.res[i].Question+`</p>
+                                <input type = "file" name = "response`+(i)+`" id= "file" />
+                                <p class="InsideText">Drag your files here or click in this area.</p>
+                            </div>
+                        `;
+                        totalPages +=1;
+                    }else if(javaScriptVar.res[i].ResponseType === "duration"){
+                        document.getElementById('questionsForm').innerHTML += `
+                            <div class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                                <p class="DynamicText" id = "DynamicText"></p>
+                                </br>
+                                <p class="Text">`+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                                <input type = "number" name = "response`+(i)+`"  id= "response`+(i)+`"/><span class = "weeks">weeks</span>
+                            </div>
+                        `;
+                        totalPages +=1; 
+                    }else if(javaScriptVar.res[i].ResponseType === "textarea"){
+                        document.getElementById('questionsForm').innerHTML += `
+                            <div  class="form-group" id = "question`+(javaScriptVar.res[i].QuestionId)+`">
+                                <p class="Text">`+javaScriptVar.res[i].Question+`<span style="color:red;">*</span></p>
+                                <input type = "textarea" name = "response`+(i)+`"  placeholder = "Enter text here" id= "response`+(i)+`"/>
+                            </div>
+                        `;
+                        totalPages +=1; 
+                    }
+                
+                questionId.push(javaScriptVar.res[i].QuestionId);
             }
-            
-            questionId.push(javaScriptVar.res[i].QuestionId);
-        }
+
+
 
         document.getElementById('questionsForm').innerHTML +=`
-        <div Id="questionSubmit">
-            <div class="form-group">
-                <input type = "checkbox"  name="terms" value="1" required> 
-                I Agree  
-                <a href="javascript:void(0);" class = "NDAText" id="mpopupLink">
-                    NDA
-                </a>
-                <span class="invalid-feedback"></span>
-            </div>  
-            <input type="submit" class="btn btn-primary" name = "responseSubmit" id = "responseSubmit" value="Submit">
-        </div>
+            <div Id="questionSubmit">
+                <div class="form-group">
+                    <p class = "NDAText">We are almost in a relationship now</p>
+                    <p class = "NDAText">Can't wait to talk to you !</p>
+
+                    <p class = "NDALinkText">  
+                    
+                        <input type = "checkbox"  name="terms" value="1" required> 
+                            Send me the 
+                            <a href="javascript:void(0);" id="mpopupLink">
+                                NDA
+                            </a>
+                    </p>
+                    <span class="invalid-feedback"></span>
+                </div>  
+                <input type="submit" class="btn btn-primary" name = "responseSubmit" id = "responseSubmit" value="Submit">
+            </div>
         `;
         
         showFirstReq(javaScriptVar, 1);
         
         //Set counter as 1 for the default page one
         counter = 0;
-        console.log(totalPages)
+        
+        // function to show options text and to validate radiobtns 
+            function DigitalOptionTexts(option, elem){
+                var textDict = {
+                    'Augmented Reality': "Cool, diving in the world of AR",
+                    'Virtual Reality': "Fine, lets put those headsets on",
+                    'Web Games': "Let the swiping act begin !",
+                    'Virtual Spaces': "I'm a couch potato",
+                    'Smart Apps': "Native or hybrid, let's decide later",
+                    'Metaverse': "FOMO, huh ?",
+                    'Virtual Conferences': "Meetings in you pajamas"
+                };
+
+                if(option in textDict){
+                    document.getElementById('DynamicText').innerHTML = textDict[option];
+                }
+                
+                //redirect to next page in case of radio buttons 
+                if(elem.type === "radio"){
+                    if(counter<javaScriptVar.res.length){
+                        document.getElementById("frm1").style.display  = "none";
+                        document.getElementById('left').style.display = "block";
+                        document.getElementById('right').style.display = "block";
+                        counter+=1;
+                        if(counter>=javaScriptVar.res.length){
+                            
+                            showFirstReq(javaScriptVar, 0);
+                            document.getElementById('right').style.display = "none";
+                            document.getElementById('questionSubmit').style.display = "block";
+                        }
+                        navigatePage(questionId, counter);
+
+                    }else{
+                        console.log("Can't move right");
+                    }
+                }
+            }
+
+        
         // Navigating pages block - start
         document.getElementById('left').addEventListener('click', function(e) {
-            console.log('counter left : '+counter);
             
-            if(counter<=javaScriptVar.res.length && counter>0){
+            if(counter<=javaScriptVar.res.length && counter>=0){    
                 document.getElementById('left').style.display = "block";
                 document.getElementById('right').style.display = "block";
                 counter-=1;
                 if(counter<0){
-                    showFirstReq(jsArr);
-                    document.getElementById('left').style.display = "none";
-                }
-                navigatePage(questionId, counter);
-            }else if(counter === 0){
-                showFirstReq(javaScriptVar, 0);
-                document.getElementById("frm1").style.display  = "block";
-                document.getElementById('left').style.display = "none";
-            }else if(counter<0){
-                console.log("Can't move left");
-            }
-            console.log(counter);
-        });
-        
-        document.getElementById('right').addEventListener('click', function(e) {
-            console.log('counter right : '+counter);
-            if(counter<javaScriptVar.res.length){
-                document.getElementById("frm1").style.display  = "none";
-                document.getElementById('left').style.display = "block";
-                document.getElementById('right').style.display = "block";
-                counter+=1;
-                if(counter>=javaScriptVar.res.length){
-                   
+                    document.getElementById("frm1").style.display  = "block";
+                    showFirstReq(javaScriptVar, 0);
                     document.getElementById('right').style.display = "none";
-                    document.getElementById('questionSubmit').style.display = "block";
+                }else{
+                    navigatePage(questionId, counter);
                 }
-                navigatePage(questionId, counter);
-            }else if(counter === 0){
-                console.log("IN");
-                showFirstReq(javaScriptVar, 1);
-            }else{
-                console.log("Can't move right");
+
+            }else if(counter<0){
+                // console.log("Can't move left");
             }
             // console.log(counter);
         });
+
+
+        document.getElementById('right').addEventListener('click', function(e) {
+            console.log("in");
+
+            if(document.getElementsByName('response'+counter+'')[0].type === 'file'){
+                if(counter<javaScriptVar.res.length){
+                    document.getElementById("frm1").style.display  = "none";
+                    document.getElementById('left').style.display = "block";
+                    document.getElementById('right').style.display = "block";
+                    counter+=1;
+                    if(counter>=javaScriptVar.res.length){
+                        
+                        showFirstReq(javaScriptVar, 0);
+                        document.getElementById('right').style.display = "none";
+                        document.getElementById('questionSubmit').style.display = "block";
+                    }
+                    navigatePage(questionId, counter);
+
+                }else{
+                    console.log("Can't move right");
+                }
+            }else if(
+            // TO check if radio input is on page
+            (document.getElementsByName('response'+counter+'')[0].type === 'radio') 
+            // to check if option selected or not in select dropdown 
+            || (document.getElementById('response'+counter+'').type === 'select-one' && document.getElementById('response'+counter+'').value.length === 0)
+            ){
+                alert("To proceed please select an option."); 
+            }else if( 
+            // to check validation for text and number if empty then show error
+            (document.getElementById('response'+counter+'').type === 'number'
+            && document.getElementById('response'+counter+'').value.trim().length === 0)
+            ){
+                alert("Please enter input.");
+            }else{
+                if(counter<javaScriptVar.res.length){
+                    document.getElementById("frm1").style.display  = "none";
+                    document.getElementById('left').style.display = "block";
+                    document.getElementById('right').style.display = "block";
+                    counter+=1;
+                    if(counter>=javaScriptVar.res.length){
+                        
+                        showFirstReq(javaScriptVar, 0);
+                        document.getElementById('right').style.display = "none";
+                        document.getElementById('questionSubmit').style.display = "block";
+                    }
+                    navigatePage(questionId, counter);
+
+                }else{
+                    console.log("Can't move right");
+                }
+            }
+        
+        });
+
+        //navigate directly by clicking on radio btns
+            
         // Navigating pages block - end
 
 
 
-        // For modal popup - START
+    // For modal popup - START
         // Select modal
         var mpopup = document.getElementById('mpopupBox');
 
@@ -403,7 +530,7 @@ if($("input[name='RequirementTypes']").prop("checked")){
                 mpopup.style.display = "none";
             }
         };
-        // For modal popup - END
+    // For modal popup - END
     }
 
 </script>
