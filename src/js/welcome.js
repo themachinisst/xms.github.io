@@ -9,12 +9,12 @@ function autoSubmit(elem)
 }
 
 function showFirstReq(jsArr, start){
-    console.log(start);
     for(var i=start; i<jsArr.res.length; i++){
         document.getElementById("question"+jsArr.res[i].QuestionId).style.display  = "none";
         document.getElementById("questionSubmit").style.display  = "none";
     }
 }
+
 
 
 function navigatePage(questionId, pagenum){
@@ -24,16 +24,16 @@ function navigatePage(questionId, pagenum){
     // pagenum+=1;
     
     let arrLength = questionId.length;
-    console.log("pagenumber sent : "+pagenum+" Array len "+arrLength);
+    // console.log("pagenumber sent : "+pagenum+" Array len "+arrLength);
 
     for(var i=0; i<arrLength; i++){
         // console.log(questionId[i], i===pagenum, i===arrLength);
         if(i === pagenum){
             document.getElementById("question"+questionId[i]).style.display  = "block";
             // console.log("first");
-        // }else if(questionId[i] === ){
-        //     document.getElementById("questionSubmit").style.display  = "block";
-        //     console.log("sec");
+        }else if(pagenum === arrLength){
+            document.getElementById("questionSubmit").style.display  = "block";
+            console.log("sec");
         }else{
             document.getElementById("question"+questionId[i]).style.display  = "none";
             document.getElementById("questionSubmit").style.display  = "none";
